@@ -1,1 +1,61 @@
-bdbdhdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chess Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container" style="max-width: 800px;">
+        <!-- Header / Navigation -->
+        <header>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
+        </header>
+
+        <!-- Main Content Area -->
+        <main>
+            <section id="home-section" class="tab-content active">
+                <div class="welcome-box">
+                    <h2 id="homeWelcomeTitle">Welcome, Player!</h2>
+                    <p>Choose your mode, open the gameplay variants, or enter the matchmaking arena.</p>
+                    
+                    <!-- Designated Game Links & Store Link (Includes How to Play pointing to tutorial.html) -->
+                    <div class="cta-buttons">
+                        <a href="game.html" class="btn primary-btn" style="background: var(--secondary); color: #121214;">Enter Matchmaking Arena</a>
+                        <a href="tutorial.html" class="btn outline-btn" style="border-color: var(--secondary); color: var(--secondary);">How to Play</a>
+                        <a href="shop.html" class="btn primary-btn" style="background: var(--primary); color: #fff;">Buy Game Boards (New Store)</a>
+                        <a href="https://modernchess.github.io/online" target="_blank" class="btn outline-btn">Play Online (Direct)</a>
+                        <a href="https://modernchess.github.io/bot" target="_blank" class="btn outline-btn">Play with Bot</a>
+                        <a href="https://modernchess.github.io/offline" target="_blank" class="btn outline-btn">Play Offline</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Powered by GitHub & Firebase.</p>
+        </footer>
+    </div>
+
+    <!-- Advanced Floating Logger System Integration -->
+    <script type="module" src="logger.js"></script>
+
+    <!-- Session Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('arena_chess_user');
+            const savedAvatar = localStorage.getItem('arena_chess_avatar') || '😀';
+            const welcomeTitle = document.getElementById('homeWelcomeTitle');
+
+            if (savedUser && welcomeTitle) {
+                welcomeTitle.innerHTML = `Welcome, <span style="vertical-align: middle; margin-right: 2px;">${savedAvatar}</span> ${savedUser}!`;
+            }
+        });
+    </script>
+</body>
+</html>
