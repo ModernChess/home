@@ -1,1 +1,43 @@
-vdhdhhdhdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chess - Interactive Tutorial</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container" style="max-width: 750px;">
+        <header>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
+            <a href="index.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Home</a>
+        </header>
+
+        <main>
+            <!-- RULES & INTERACTIVE PREVIEW CONTAINER -->
+            <section id="rules-section">
+                <!-- Dynamically rendered via tutorial.js -->
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Independent Network.</p>
+        </footer>
+    </div>
+
+    <!-- Advanced Floating Logger System Integration -->
+    <script type="module" src="logger.js"></script>
+
+    <!-- Interactive Tutorial System Script -->
+    <script type="module">
+        import { initTutorial } from './tutorial.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            initTutorial();
+        });
+    </script>
+</body>
+</html>
