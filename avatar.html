@@ -1,1 +1,116 @@
-bfbdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Avatar - Modern Chess</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0; }
+        .avatar-option { font-size: 2.2rem; background: rgba(255,255,255,0.03); border: 2px solid var(--border-color); border-radius: 12px; padding: 10px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
+        .avatar-option:hover { background: rgba(255,255,255,0.08); border-color: var(--secondary); transform: scale(1.05); }
+        .avatar-option.selected { border-color: var(--secondary); background: rgba(46, 204, 113, 0.15); box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        .current-preview { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 500px;">
+        <header>
+            <h1 class="logo">CHOOSE<span>AVATAR</span></h1>
+            <a href="game.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Arena</a>
+        </header>
+
+        <main>
+            <div class="welcome-box" style="text-align: center;">
+                <h2>Select Your Profile Emoji</h2>
+                <p>Pick one of 25 avatars to represent you in matches and global chat.</p>
+                
+                <div class="current-preview">
+                    <span>Selected:</span>
+                    <span id="selectedEmojiPreview" style="font-size: 2rem;">😀</span>
+                </div>
+
+                <!-- 25 Emojis Selection Grid -->
+                <div class="avatar-grid" id="avatarGrid">
+                    <!-- Populated dynamically or statically -->
+                </div>
+
+                <button id="saveAvatarBtn" class="btn primary-btn" style="width: 100%;">Save & Return to Arena</button>
+                <p id="avatarStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary);"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Independent Network.</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { db, ref, set, get } from './network.js';
+        
+        const EMOJIS = [
+            '😀', '😎', '🤖', '🦊', '🐱', 
+            '🦁', '🐯', '🦄', '🐲', '👻', 
+            '💀', '👽', '👑', '⚡', '🔥', 
+            '💎', '🚀', '⚽', '🎯', '🎮', 
+            '🏆', '🧙‍♂️', '🥷', '🦸‍♂️', '🦾'
+        ];
+
+        const currentUser = localStorage.getItem('arena_chess_user');
+        if (!currentUser) {
+            window.location.href = 'game.html';
+        }
+
+        let chosenEmoji = '😀';
+        const grid = document.getElementById('avatarGrid');
+        const preview = document.getElementById('selectedEmojiPreview');
+        const statusText = document.getElementById('avatarStatus');
+
+        // Load existing saved avatar if available
+        async function loadCurrentAvatar() {
+            const userRef = ref(db, `arena_users/${currentUser}/avatar`);
+            const snap = await get(userRef);
+            if (snap.exists()) {
+                chosenEmoji = snap.val();
+                preview.innerText = chosenEmoji;
+            }
+            renderGrid();
+        }
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            EMOJIS.forEach(emoji => {
+                const btn = document.createElement('div');
+                btn.className = `avatar-option ${emoji === chosenEmoji ? 'selected' : ''}`;
+                btn.innerText = emoji;
+                btn.onclick = () => {
+                    chosenEmoji = emoji;
+                    preview.innerText = emoji;
+                    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+                    btn.classList.add('selected');
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        document.getElementById('saveAvatarBtn').onclick = async () => {
+            try {
+                // Save to user profile in firebase
+                await set(ref(db, `arena_users/${currentUser}/avatar`), chosenEmoji);
+                // Also update local storage cache for immediate rendering
+                localStorage.setItem('arena_chess_avatar', chosenEmoji);
+                statusText.innerText = "Avatar saved successfully!";
+                setTimeout(() => {
+                    window.location.href = 'game.html';
+                }, 800);
+            } catch (err) {
+                statusText.style.color = "var(--accent)";
+                statusText.innerText = "Failed to save avatar.";
+            }
+        };
+
+        loadCurrentAvatar();
+    </script>
+</body>
+</html>
