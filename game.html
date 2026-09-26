@@ -1,1 +1,115 @@
-hdbbdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chess - Independent Game Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .screen { display: none; }
+        .screen.active { display: block; }
+        /* Prevent ugly flashing before JS checks local cache */
+        #login-screen { opacity: 0; transition: opacity 0.15s ease-in; }
+        
+        .auth-tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .auth-tab { flex: 1; padding: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
+        .auth-tab.active { color: var(--secondary); border-bottom: 2px solid var(--secondary); }
+        .player-card { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255,255,255,0.03); margin-bottom: 5px; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color); }
+        .player-badge-online { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        
+        /* Mobile-Friendly Arena Grid */
+        .arena-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 600px) {
+            .arena-grid { grid-template-columns: 1fr; }
+        }
+
+        .global-chat-msg { font-size: 0.8rem; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 4px; word-break: break-word; }
+        .global-chat-msg span { color: var(--secondary); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="max-width: 650px;">
+        <header>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
+            <a href="index.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Home</a>
+        </header>
+
+        <main>
+            <!-- 1. AUTHENTICATION SCREEN (LOGIN & SIGN UP) -->
+            <div id="login-screen" class="screen active">
+                <div class="welcome-box">
+                    <h2>Independent Portal</h2>
+                    <p>Log in with custom accounts, presets (e.g., player1 / 123), or create a new user profile.</p>
+                    
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" onclick="switchAuthMode('login')">Sign In</button>
+                        <button class="auth-tab" onclick="switchAuthMode('signup')">Create Account</button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="userInput" placeholder="Username" style="padding: 12px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff;">
+                        <input type="password" id="passInput" placeholder="Password" style="padding: 12px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff;">
+                    </div>
+                    
+                    <button id="authActionBtn" class="btn primary-btn">Login</button>
+                    <p id="loginError" style="color: var(--accent); font-size: 0.8rem; margin-top: 10px; text-align: center;"></p>
+                </div>
+            </div>
+
+            <!-- 2. LOBBY SCREEN -->
+            <div id="lobby-screen" class="screen">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
+                    <h3 id="welcomeUser" style="font-size: 1rem; color: var(--secondary);">Logged in</h3>
+                    <div style="display: flex; gap: 6px;">
+                        <a href="avatar.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto; background: rgba(46,204,113,0.1);">Change Avatar</a>
+                        <button id="logoutBtn" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Main Arena Grid: Active Players & Global Chat -->
+                <div class="arena-grid">
+                    <!-- Active Players Box -->
+                    <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                        <h4 id="onlineCountText" style="font-size: 0.85rem; margin-bottom: 8px;">Active Players (0)</h4>
+                        <div id="playersListContainer" style="height: 160px; overflow-y: auto;"></div>
+                    </div>
+
+                    <!-- Global Chat Box -->
+                    <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; flex-direction: column;">
+                        <h4 style="font-size: 0.85rem; margin-bottom: 8px;">Global Chat Room</h4>
+                        <div id="globalChatMessages" style="height: 120px; max-height: 120px; overflow-y: auto; margin-bottom: 8px; padding-right: 4px; border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; background: rgba(0,0,0,0.3); padding: 6px;"></div>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" id="globalChatInput" placeholder="Type message..." style="flex: 1; padding: 8px; font-size: 0.8rem; background: #121214; border: 1px solid var(--border-color); color: #fff; border-radius: 6px;">
+                            <button id="globalChatSend" class="btn primary-btn" style="padding: 8px 12px; font-size: 0.8rem; width: auto;">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Independent Network.</p>
+        </footer>
+    </div>
+
+    <!-- Advanced Floating Logger System Integration -->
+    <script type="module" src="logger.js"></script>
+
+    <!-- Main Game UI Logic -->
+    <script type="module" src="ui-manager.js"></script>
+
+    <script>
+        let isSignUpMode = false;
+        function switchAuthMode(mode) {
+            isSignUpMode = (mode === 'signup');
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('authActionBtn').innerText = isSignUpMode ? 'Register & Sign Up' : 'Login';
+        }
+    </script>
+</body>
+</html>
