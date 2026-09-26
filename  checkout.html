@@ -1,1 +1,98 @@
-hdhdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chess - Address Confirmation</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .summary-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted); }
+        .summary-box span { color: #fff; font-weight: 600; }
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 10px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="max-width: 500px;">
+        <header>
+            <h1 class="logo">CHECK<span>OUT</span></h1>
+            <a href="shop.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Shop</a>
+        </header>
+
+        <main>
+            <div class="welcome-box" style="margin-bottom: 15px;">
+                <h2>Shipping & Confirmation</h2>
+                <p>Verify your customization configurations and provide delivery details.</p>
+            </div>
+
+            <!-- Configuration Summary Block -->
+            <div class="summary-box" id="orderSummary">
+                Loading customized options...
+            </div>
+
+            <!-- Address Form -->
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="addressLine">Street Address</label>
+                <input type="text" id="addressLine" placeholder="123 Strategy Lane, Suite 4B">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" placeholder="New York">
+                </div>
+                <div class="form-group">
+                    <label for="postalCode">Postal Code</label>
+                    <input type="text" id="postalCode" placeholder="10001">
+                </div>
+            </div>
+
+            <button id="confirmOrderBtn" class="btn primary-btn" style="margin-top: 15px; background: var(--secondary); color: #121214;">Confirm & Place Order</button>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Secured Checkout.</p>
+        </footer>
+    </div>
+
+    <!-- Advanced Floating Logger System Integration -->
+    <script type="module" src="logger.js"></script>
+
+    <script type="module">
+        import { globalLogger } from './logger.js';
+
+        // Parse configuration params from URL
+        const params = new URLSearchParams(window.location.search);
+        const material = params.get('material') || 'Standard Wood';
+        const size = params.get('size') || 'Standard';
+        const engraving = params.get('engraving') || 'None';
+
+        document.getElementById('orderSummary').innerHTML = `
+            <div><strong>Selected Material:</strong> <span>${material.toUpperCase()}</span></div>
+            <div><strong>Dimensions:</strong> <span>${size.toUpperCase()}</span></div>
+            <div><strong>Laser Engraving:</strong> <span>${engraving}</span></div>
+        `;
+
+        document.getElementById('confirmOrderBtn').addEventListener('click', () => {
+            const name = document.getElementById('fullName').value;
+            const address = document.getElementById('addressLine').value;
+
+            if (!name || !address) {
+                globalLogger.log("Checkout failed: Missing delivery address details.", "error", "checkout.html:58");
+                alert("Please fill out your name and street address.");
+                return;
+            }
+
+            globalLogger.log(`Order successfully placed by ${name} to address: ${address}`, "success");
+            alert("Order placed successfully! Check your floating logger for diagnostics.");
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
