@@ -1,1 +1,188 @@
-bdhddhhdhd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chess - Buy Game Boards</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .product-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .product-img { width: 100%; height: 140px; background: #0b0b0d; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; border: 1px dashed var(--border-color); position: relative; overflow: hidden; }
+        
+        .customization-group { margin-bottom: 16px; text-align: left; }
+        .customization-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Modern Selectable Option Cards */
+        .option-grid { display: flex; flex-direction: column; gap: 8px; }
+        .option-card {
+            background: #121214;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            color: #fff;
+            position: relative;
+        }
+        .option-card:hover {
+            border-color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .option-card.selected {
+            border-color: var(--secondary);
+            background: rgba(0, 206, 201, 0.08);
+        }
+        .option-radio {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
+        }
+        .option-card.selected .option-radio {
+            border-color: var(--secondary);
+        }
+        .option-card.selected .option-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+        }
+
+        /* Coming Soon Badge Styling */
+        .option-card.coming-soon {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+        }
+
+        .customization-group input { width: 100%; padding: 10px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; }
+        .price-tag { font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="max-width: 500px;">
+        <header>
+            <h1 class="logo">BOARD<span>SHOP</span></h1>
+            <a href="index.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Home</a>
+        </header>
+
+        <main>
+            <div class="welcome-box" style="margin-bottom: 15px;">
+                <h2>Physical Custom Boards</h2>
+                <p>Configure your tactile battlefield set with custom materials, sizes, and engravings.</p>
+            </div>
+
+            <!-- Product & Customization Form -->
+            <div class="product-card">
+                <div class="product-img">🖼️ [3D Model Preview Placeholder]</div>
+                <h3 style="font-size: 1.1rem; color: #fff;">Tactical Strategy Board & Sets</h3>
+                <div class="price-tag" id="displayPrice">৳199 BDT</div>
+
+                <!-- Styled Board & Unit Editions Options (All Coming Soon with Adjusted BDT Prices ending in 99) -->
+                <div class="customization-group">
+                    <label>Board & Unit Configuration</label>
+                    <div class="option-grid" id="tierGroup">
+                        <div class="option-card coming-soon" data-value="basic-normal">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Basic Board + Normal Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳199 BDT</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                        <div class="option-card coming-soon" data-value="advanced-normal">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Advanced Board + Normal Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳299 BDT</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                        <div class="option-card coming-soon" data-value="basic-realistic-primary">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Basic Board + Realistic Primary Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳399 BDT</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                        <div class="option-card coming-soon" data-value="advanced-realistic-both">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Advanced Board + Realistic Primary & Secondary</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳599 BDT</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Styled Board Dimensions Options (All Coming Soon) -->
+                <div class="customization-group">
+                    <label>Board Dimensions</label>
+                    <div class="option-grid" id="sizeGroup">
+                        <div class="option-card coming-soon" data-value="standard">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Standard Tournament (16x16")</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                        <div class="option-card coming-soon" data-value="compact">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Compact Portable (12x12")</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                        <div class="option-card coming-soon" data-value="giant">
+                            <div>
+                                <span style="display: block; font-weight: 600;">Collector's Grand (24x24")</span>
+                            </div>
+                            <span class="coming-soon-badge">Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="customization-group">
+                    <label for="engravingInput">Custom Laser Engraving (Name/Tag)</label>
+                    <input type="text" id="engravingInput" placeholder="Awaiting release..." disabled style="opacity: 0.5; cursor: not-allowed;">
+                </div>
+
+                <button id="proceedCheckoutBtn" class="btn outline-btn" style="margin-top: 15px; width: 100%; opacity: 0.5; cursor: not-allowed;" disabled>Products Currently Unavailable</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Global Shipping Available.</p>
+        </footer>
+    </div>
+
+    <!-- Advanced Floating Logger System Integration -->
+    <script type="module" src="logger.js"></script>
+
+    <script type="module">
+        import { globalLogger } from './logger.js';
+
+        document.getElementById('proceedCheckoutBtn').addEventListener('click', () => {
+            globalLogger.log('Attempted checkout on coming soon products.', 'warn');
+        });
+    </script>
+</body>
+</html>
