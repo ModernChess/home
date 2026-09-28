@@ -1,9 +1,11 @@
-// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, and Fast Cache
+// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, Factions, Ranks, and Fast Cache
 import { db, ref, set, get, onValue, push, remove, update, onDisconnect, serverTimestamp } from './network.js';
 import { globalLogger } from './logger.js';
 
 let currentUser = localStorage.getItem('arena_chess_user') || null;
 let currentAvatar = localStorage.getItem('arena_chess_avatar') || '😀';
+let currentFaction = localStorage.getItem('arena_chess_faction') || 'Order';
+let currentRank = localStorage.getItem('arena_chess_rank') || 'Trainee ⭐';
 let authMode = 'login'; // 'login' or 'signup'
 
 window.switchAuthMode = function(mode) {
@@ -23,9 +25,7 @@ async function hashPassword(password) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     
-    // TEST LOG: Displays the password transformation in your floating console
     globalLogger.log(`[TEST HASH] "${password}" ➔ ${hashHex}`, "info");
-    
     return hashHex;
 }
 
@@ -40,18 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!authActionBtn) return;
 
-    // FAST-PATH: If user is cached locally, instantly skip login flash and show lobby
     if (currentUser) {
         globalLogger.log(`Fast-restored session from cache for: ${currentUser}`, "info");
         if (loginScreen) loginScreen.classList.remove('active');
         if (lobbyScreen) lobbyScreen.classList.add('active');
         loginUser(currentUser, true);
     } else {
-        // If not cached, reveal login screen smoothly
         if (loginScreen) loginScreen.style.opacity = '1';
     }
 
-    // Authentication Action Handler with Local Hashing
     authActionBtn.addEventListener('click', async () => {
         const username = userInput.value.trim();
         const password = passInput.value.trim();
@@ -66,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         authActionBtn.disabled = true;
 
         try {
-            // Hash the password locally before doing anything else
             const hashedPassword = await hashPassword(password);
             const userRef = ref(db, `arena_users/${username}`);
             const snapshot = await get(userRef);
@@ -78,8 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     authActionBtn.disabled = false;
                     return;
                 }
-                // Save the HASHED password, never the plaintext string
-                await set(userRef, { password: hashedPassword, avatar: '😀', createdAt: serverTimestamp() });
+                await set(userRef, { 
+                    password: hashedPassword, 
+                    avatar: '😀', 
+                    faction: 'Order', 
+                    rank: 'Trainee ⭐', 
+                    createdAt: serverTimestamp() 
+                });
                 globalLogger.log(`New independent user registered: ${username}`, "success");
                 loginUser(username);
             } else {
@@ -88,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     isValidPreset = true;
                 }
 
-                // Match stored hash against computed login hash
                 if (snapshot.exists() && snapshot.val().password === hashedPassword) {
                     isValidPreset = true;
                 }
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Logout Handler
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (currentUser) {
@@ -121,6 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             localStorage.removeItem('arena_chess_user');
             localStorage.removeItem('arena_chess_avatar');
+            localStorage.removeItem('arena_chess_faction');
+            localStorage.removeItem('arena_chess_rank');
             currentUser = null;
             document.getElementById('lobby-screen').classList.remove('active');
             const lScreen = document.getElementById('login-screen');
@@ -135,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Global Chat Send Action
     const chatSendBtn = document.getElementById('globalChatSend');
     const chatInput = document.getElementById('globalChatInput');
 
@@ -154,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         push(chatRef, {
             sender: currentUser,
             avatar: currentAvatar,
+            faction: currentFaction,
+            rank: currentRank,
             message: text,
             timestamp: serverTimestamp()
         });
@@ -168,16 +170,29 @@ async function loginUser(username, fromCache = false) {
     currentUser = username;
     localStorage.setItem('arena_chess_user', username);
 
-    // If loaded from cache, use cached avatar instantly, fetch fresh avatar in background
     currentAvatar = localStorage.getItem('arena_chess_avatar') || '😀';
-    updateWelcomeDisplay(username, currentAvatar);
+    currentFaction = localStorage.getItem('arena_chess_faction') || 'Order';
+    currentRank = localStorage.getItem('arena_chess_rank') || 'Trainee ⭐';
+    
+    updateWelcomeDisplay(username, currentAvatar, currentFaction, currentRank);
 
     try {
-        const avatarSnap = await get(ref(db, `arena_users/${username}/avatar`));
-        if (avatarSnap.exists()) {
-            currentAvatar = avatarSnap.val();
-            localStorage.setItem('arena_chess_avatar', currentAvatar);
-            updateWelcomeDisplay(username, currentAvatar);
+        const userSnap = await get(ref(db, `arena_users/${username}`));
+        if (userSnap.exists()) {
+            const val = userSnap.val();
+            if (val.avatar) { 
+                currentAvatar = val.avatar; 
+                localStorage.setItem('arena_chess_avatar', currentAvatar); 
+            }
+            if (val.faction) { 
+                currentFaction = val.faction; 
+                localStorage.setItem('arena_chess_faction', currentFaction); 
+            }
+            if (val.rank) { 
+                currentRank = val.rank; 
+                localStorage.setItem('arena_chess_rank', currentRank); 
+            }
+            updateWelcomeDisplay(username, currentAvatar, currentFaction, currentRank);
         }
     } catch(e) {
         // Fallback silently if offline or slow
@@ -189,16 +204,22 @@ async function loginUser(username, fromCache = false) {
     if (loginScreen) loginScreen.classList.remove('active');
     if (lobbyScreen) lobbyScreen.classList.add('active');
 
-    // Set up Realtime Presence tracking
     const presenceRef = ref(db, `arena_presence/${username}`);
-    set(presenceRef, { online: true, avatar: currentAvatar, lastSeen: serverTimestamp() });
+    set(presenceRef, { 
+        online: true, 
+        avatar: currentAvatar, 
+        faction: currentFaction, 
+        rank: currentRank, 
+        lastSeen: serverTimestamp() 
+    });
     onDisconnect(presenceRef).update({ online: false, lastSeen: serverTimestamp() });
 }
 
-function updateWelcomeDisplay(username, avatar) {
+function updateWelcomeDisplay(username, avatar, faction, rank) {
     const welcomeUser = document.getElementById('welcomeUser');
     if (welcomeUser) {
-        welcomeUser.innerHTML = `<span style="font-size: 1.2rem; margin-right: 6px; vertical-align: middle;">${avatar}</span> Logged in as: <strong>${username}</strong>`;
+        const factionColor = faction === 'Order' ? 'var(--secondary)' : 'var(--accent)';
+        welcomeUser.innerHTML = `<span style="font-size: 1.1rem; margin-right: 4px; vertical-align: middle;">${avatar}</span> <span style="color: ${factionColor}; font-weight: 600;">[${faction} • ${rank}]</span> <strong>${username}</strong>`;
     }
 }
 
@@ -216,9 +237,21 @@ function initGlobalChat() {
             if (!msg || typeof msg.message !== 'string') return;
 
             const msgAvatar = msg.avatar || '😀';
+            const msgFaction = msg.faction || 'Order';
+            const msgRank = msg.rank || 'Trainee ⭐';
+            const factionTagColor = msgFaction === 'Order' ? '#2ecc71' : '#e74c3c';
+
             const div = document.createElement('div');
             div.className = 'global-chat-msg';
-            div.innerHTML = `<span style="margin-right: 4px;">${msgAvatar}</span><span>${msg.sender || 'Unknown'}:</span> ${escapeHtml(msg.message)}`;
+            // Updated chat display to include both faction and tier rank stars/comets clearly
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px; flex-wrap: wrap;">
+                    <span>${msgAvatar}</span>
+                    <span style="color: ${factionTagColor}; font-size: 0.75rem; font-weight: 700;">[${msgFaction} • ${msgRank}]</span>
+                    <span style="color: var(--secondary); font-weight: 600;">${msg.sender || 'Unknown'}:</span>
+                </div>
+                <div style="padding-left: 20px; word-break: break-word;">${escapeHtml(msg.message)}</div>
+            `;
             chatMessagesContainer.appendChild(div);
         });
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
@@ -245,12 +278,20 @@ function initActivePlayersListener() {
             if (status.online) {
                 onlineCount++;
                 const playerAvatar = status.avatar || '😀';
+                const playerFaction = status.faction || 'Order';
+                const playerRank = status.rank || 'Trainee ⭐';
+                const factionColor = playerFaction === 'Order' ? '#2ecc71' : '#e74c3c';
+
                 const div = document.createElement('div');
                 div.className = 'player-card';
+                // Updated active player card display to show the complete star or comet tier badge
                 div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 1.1rem;">${playerAvatar}</span>
-                        <span><span class="player-badge-online"></span>${name}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">${playerAvatar}</span>
+                        <div>
+                            <div><span class="player-badge-online"></span><strong>${name}</strong></div>
+                            <div style="font-size: 0.75rem; color: ${factionColor}; font-weight: 600;">${playerFaction} • ${playerRank}</div>
+                        </div>
                     </div>
                     <span style="font-size: 0.75rem; color: #2ecc71;">Online</span>
                 `;
@@ -266,4 +307,3 @@ function escapeHtml(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-
