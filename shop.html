@@ -7,11 +7,34 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --ui-bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/uiback.png');
+            --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        body {
+            color: #ffffff;
+        }
+        .container {
+            background: var(--ui-bg-image);
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            box-shadow: none;
+            padding: 15px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1, h2, h3, p, span, label {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
         .product-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
-        .product-img { width: 100%; height: 140px; background: #0b0b0d; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; border: 1px dashed var(--border-color); position: relative; overflow: hidden; }
         
         .customization-group { margin-bottom: 16px; text-align: left; }
-        .customization-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .customization-group label { display: block; font-size: 0.8rem; color: #e0e0e0; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: var(--text-shadow); }
         
         /* Modern Selectable Option Cards */
         .option-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -28,6 +51,7 @@
             font-size: 0.85rem;
             color: #fff;
             position: relative;
+            text-shadow: var(--text-shadow);
         }
         .option-card:hover {
             border-color: var(--text-muted);
@@ -74,86 +98,92 @@
             letter-spacing: 0.8px;
             text-transform: uppercase;
             box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+            text-shadow: none;
         }
 
-        .customization-group input { width: 100%; padding: 10px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; }
-        .price-tag { font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin: 10px 0; }
+        .customization-group input { width: 100%; padding: 10px; border-radius: 8px; background: #121214; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; box-sizing: border-box; }
+        .price-tag { font-size: 1.2rem; font-weight: 700; color: var(--secondary); margin: 10px 0; text-shadow: var(--text-shadow); }
+        footer p {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
     </style>
 </head>
 <body>
 
-    <div class="container" style="max-width: 500px;">
+    <div class="container">
         <header>
-            <h1 class="logo">BOARD<span>SHOP</span></h1>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
             <a href="index.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Home</a>
         </header>
 
         <main>
-            <div class="welcome-box" style="margin-bottom: 15px;">
+            <div class="welcome-box" style="margin-bottom: 15px; text-align: center;">
                 <h2>Physical Custom Boards</h2>
                 <p>Configure your tactile battlefield set with custom materials, sizes, and engravings.</p>
             </div>
 
             <!-- Product & Customization Form -->
             <div class="product-card">
-                <div class="product-img">🖼️ [3D Model Preview Placeholder]</div>
-                <h3 style="font-size: 1.1rem; color: #fff;">Tactical Strategy Board & Sets</h3>
+                <h3 style="font-size: 1.1rem; color: #fff; text-shadow: var(--text-shadow);">Tactical Strategy Board & Sets</h3>
                 <div class="price-tag" id="displayPrice">৳199 BDT</div>
 
-                <!-- Styled Board & Unit Editions Options (All Coming Soon with Adjusted BDT Prices ending in 99) -->
+                <!-- Styled Board & Unit Editions Options -->
                 <div class="customization-group">
                     <label>Board & Unit Configuration</label>
                     <div class="option-grid" id="tierGroup">
                         <div class="option-card coming-soon" data-value="basic-normal">
                             <div>
-                                <span style="display: block; font-weight: 600;">Basic Board + Normal Units</span>
-                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳199 BDT</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Basic Board + Normal Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600; text-shadow: var(--text-shadow);">৳199 BDT</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                         <div class="option-card coming-soon" data-value="advanced-normal">
                             <div>
-                                <span style="display: block; font-weight: 600;">Advanced Board + Normal Units</span>
-                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳299 BDT</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Advanced Board + Normal Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600; text-shadow: var(--text-shadow);">৳299 BDT</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                         <div class="option-card coming-soon" data-value="basic-realistic-primary">
                             <div>
-                                <span style="display: block; font-weight: 600;">Basic Board + Realistic Primary Units</span>
-                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳399 BDT</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Basic Board + Realistic Primary Units</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600; text-shadow: var(--text-shadow);">৳399 BDT</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                         <div class="option-card coming-soon" data-value="advanced-realistic-both">
                             <div>
-                                <span style="display: block; font-weight: 600;">Advanced Board + Realistic Primary & Secondary</span>
-                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600;">৳599 BDT</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Advanced Board + Realistic Primary & Secondary</span>
+                                <span style="color: var(--secondary); font-size: 0.75rem; font-weight: 600; text-shadow: var(--text-shadow);">৳599 BDT</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Styled Board Dimensions Options (All Coming Soon) -->
+                <!-- Styled Board Dimensions Options -->
                 <div class="customization-group">
                     <label>Board Dimensions</label>
                     <div class="option-grid" id="sizeGroup">
                         <div class="option-card coming-soon" data-value="standard">
                             <div>
-                                <span style="display: block; font-weight: 600;">Standard Tournament (16x16")</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Standard Tournament (16x16")</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                         <div class="option-card coming-soon" data-value="compact">
                             <div>
-                                <span style="display: block; font-weight: 600;">Compact Portable (12x12")</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Compact Portable (12x12")</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
                         <div class="option-card coming-soon" data-value="giant">
                             <div>
-                                <span style="display: block; font-weight: 600;">Collector's Grand (24x24")</span>
+                                <span style="display: block; font-weight: 600; text-shadow: var(--text-shadow);">Collector's Grand (24x24")</span>
                             </div>
                             <span class="coming-soon-badge">Coming Soon</span>
                         </div>
