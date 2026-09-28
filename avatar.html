@@ -7,17 +7,76 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0; }
-        .avatar-option { font-size: 2.2rem; background: rgba(255,255,255,0.03); border: 2px solid var(--border-color); border-radius: 12px; padding: 10px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
+        :root {
+            --ui-bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/uiback.png');
+            --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        body {
+            color: #ffffff;
+        }
+        .container {
+            background: var(--ui-bg-image);
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            box-shadow: none;
+            padding: 15px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        h1, h2, h3, p, span {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
+        .avatar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 8px; 
+            margin: 15px 0; 
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+        .avatar-grid.loaded {
+            opacity: 1;
+        }
+        .avatar-option { 
+            font-size: 1.8rem; 
+            background: rgba(255,255,255,0.03); 
+            border: 2px solid var(--border-color); 
+            border-radius: 10px; 
+            padding: 8px; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s ease; 
+            box-sizing: border-box;
+        }
         .avatar-option:hover { background: rgba(255,255,255,0.08); border-color: var(--secondary); transform: scale(1.05); }
         .avatar-option.selected { border-color: var(--secondary); background: rgba(46, 204, 113, 0.15); box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
         .current-preview { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem; }
+        
+        /* Precautionary loading indicator styling */
+        #gridLoadingNotice {
+            font-size: 0.85rem;
+            color: #d0d0d0;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        footer p {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
     </style>
 </head>
 <body>
-    <div class="container" style="max-width: 500px;">
+    <div class="container">
         <header>
-            <h1 class="logo">CHOOSE<span>AVATAR</span></h1>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
             <a href="game.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Arena</a>
         </header>
 
@@ -31,13 +90,14 @@
                     <span id="selectedEmojiPreview" style="font-size: 2rem;">😀</span>
                 </div>
 
+                <!-- Precautionary Loading Wrapper -->
+                <div id="gridLoadingNotice">Loading selectable avatars...</div>
+
                 <!-- 25 Emojis Selection Grid -->
-                <div class="avatar-grid" id="avatarGrid">
-                    <!-- Populated dynamically or statically -->
-                </div>
+                <div class="avatar-grid" id="avatarGrid"></div>
 
                 <button id="saveAvatarBtn" class="btn primary-btn" style="width: 100%;">Save & Return to Arena</button>
-                <p id="avatarStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary);"></p>
+                <p id="avatarStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary); text-shadow: var(--text-shadow);"></p>
             </div>
         </main>
 
@@ -66,16 +126,25 @@
         const grid = document.getElementById('avatarGrid');
         const preview = document.getElementById('selectedEmojiPreview');
         const statusText = document.getElementById('avatarStatus');
+        const loadingNotice = document.getElementById('gridLoadingNotice');
 
-        // Load existing saved avatar if available
-        async function loadCurrentAvatar() {
-            const userRef = ref(db, `arena_users/${currentUser}/avatar`);
-            const snap = await get(userRef);
-            if (snap.exists()) {
-                chosenEmoji = snap.val();
+        async function initAvatarScreen() {
+            try {
+                // Precautionary wait for network retrieval of current avatar state
+                const userRef = ref(db, `arena_users/${currentUser}/avatar`);
+                const snap = await get(userRef);
+                if (snap.exists()) {
+                    chosenEmoji = snap.val();
+                    preview.innerText = chosenEmoji;
+                }
+            } catch (err) {
+                console.warn("Using local cache fallback due to network lag.");
+                const cached = localStorage.getItem('arena_chess_avatar');
+                if (cached) chosenEmoji = cached;
                 preview.innerText = chosenEmoji;
+            } finally {
+                renderGrid();
             }
-            renderGrid();
         }
 
         function renderGrid() {
@@ -92,14 +161,19 @@
                 };
                 grid.appendChild(btn);
             });
+
+            // Safely remove loading notice and reveal grid with transition
+            loadingNotice.style.display = 'none';
+            grid.classList.add('loaded');
         }
 
         document.getElementById('saveAvatarBtn').onclick = async () => {
+            statusText.style.color = "#ffffff";
+            statusText.innerText = "Saving avatar configuration...";
             try {
-                // Save to user profile in firebase
                 await set(ref(db, `arena_users/${currentUser}/avatar`), chosenEmoji);
-                // Also update local storage cache for immediate rendering
                 localStorage.setItem('arena_chess_avatar', chosenEmoji);
+                statusText.style.color = "var(--secondary)";
                 statusText.innerText = "Avatar saved successfully!";
                 setTimeout(() => {
                     window.location.href = 'game.html';
@@ -110,7 +184,7 @@
             }
         };
 
-        loadCurrentAvatar();
+        initAvatarScreen();
     </script>
 </body>
 </html>
