@@ -1,1 +1,217 @@
-hdbdbdvdb
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Faction - Modern Chess</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ui-bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/uiback.png');
+            --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        body {
+            color: #ffffff;
+        }
+        .container {
+            background: var(--ui-bg-image);
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            box-shadow: none;
+            padding: 15px;
+            border-radius: 20px;
+            box-sizing: border-box;
+            max-width: 580px;
+            margin: 0 auto;
+        }
+        h1, h2, h3, p, label {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
+        .faction-container { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin: 15px 0; 
+            box-sizing: border-box;
+        }
+        @media (max-width: 500px) {
+            .faction-container { grid-template-columns: 1fr; }
+        }
+        .faction-card { background: rgba(255,255,255,0.03); border: 2px solid var(--border-color); border-radius: 12px; padding: 15px; cursor: pointer; text-align: center; transition: all 0.2s ease; box-sizing: border-box; }
+        .faction-card:hover { transform: scale(1.02); }
+        .faction-card.selected { border-color: var(--secondary); background: rgba(46, 204, 113, 0.15); box-shadow: 0 0 15px rgba(46, 204, 113, 0.3); }
+        .faction-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; text-shadow: var(--text-shadow); }
+        .faction-desc { font-size: 0.75rem; color: #e0e0e0; text-shadow: var(--text-shadow); }
+        
+        /* Precautionary hidden state wrapper for dropdowns until fully synchronized */
+        #rankControlWrapper {
+            opacity: 0;
+            transition: opacity 0.25s ease-in;
+        }
+        #rankControlWrapper.ready {
+            opacity: 1;
+        }
+        footer p {
+            color: #ffffff;
+            text-shadow: var(--text-shadow);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">
+                <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
+            </h1>
+            <a href="game.html" class="btn outline-btn" style="padding: 6px 12px; font-size: 0.8rem; width: auto;">Back to Arena</a>
+        </header>
+
+        <main>
+            <div class="welcome-box" style="text-align: center;">
+                <h2>Align Your Allegiance & Classes</h2>
+                <p>Choose your side to unlock its exclusive class progression tree.</p>
+                
+                <div class="faction-container">
+                    <!-- The Order (Good Faction) -->
+                    <div class="faction-card" id="card-order" onclick="selectFaction('Order')">
+                        <div class="faction-title" style="color: var(--secondary);">🛡️ The Order</div>
+                        <div class="faction-desc">Civil-medieval realm of honor, governance, and strategy.</div>
+                    </div>
+
+                    <!-- The Syndicate (Evil Faction) -->
+                    <div class="faction-card" id="card-syndicate" onclick="selectFaction('Syndicate')">
+                        <div class="faction-title" style="color: var(--accent);">⚡ The Syndicate</div>
+                        <div class="faction-desc">Ruthless, dark technological force of destruction and power.</div>
+                    </div>
+                </div>
+
+                <!-- Sandbox Class Override Control Wrapper (Protected against render flash) -->
+                <div id="rankControlWrapper" style="margin: 15px 0; text-align: left; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box;">
+                    <label style="font-size: 0.85rem; color: #e0e0e0; display: block; margin-bottom: 6px; text-shadow: var(--text-shadow);">Sandbox Class Override:</label>
+                    
+                    <!-- Order Dropdown Menu -->
+                    <select id="orderRankSelect" class="rank-dropdown" style="width: 100%; padding: 10px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); box-sizing: border-box;">
+                        <option value="Grandmarshall (1st Class 🌟🌟🌟)">Grandmarshall (1st Class 🌟🌟🌟)</option>
+                        <option value="Marshal (2nd Class ⭐⭐)">Marshal (2nd Class ⭐⭐)</option>
+                        <option value="Elite Knight (3rd Class 🟦)">Elite Knight (3rd Class 🟦)</option>
+                        <option value="Knight (4th Class 🔷🔷)">Knight (4th Class 🔷🔷)</option>
+                        <option value="Count (5th Class 🔷)">Count (5th Class 🔷)</option>
+                        <option value="Trainee (6th Class 🔹)">Trainee (6th Class 🔹)</option>
+                    </select>
+
+                    <!-- Syndicate Dropdown Menu -->
+                    <select id="syndicateRankSelect" class="rank-dropdown" style="width: 100%; padding: 10px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); display: none; box-sizing: border-box;">
+                        <option value="Vindicator (1st Class 💥💥💥)">Vindicator (1st Class 💥💥💥)</option>
+                        <option value="Destroyer (2nd Class ☄️☄️)">Destroyer (2nd Class ☄️☄️)</option>
+                        <option value="Extractor (3rd Class 🟧)">Extractor (3rd Class 🟧)</option>
+                        <option value="Castigator (4th Class 🔶🔶)">Castigator (4th Class 🔶🔶)</option>
+                        <option value="Larcener (5th Class 🔶)">Larcener (5th Class 🔶)</option>
+                        <option value="Trainee (6th Class 🔸)">Trainee (6th Class 🔸)</option>
+                    </select>
+                </div>
+
+                <button id="saveFactionBtn" class="btn primary-btn" style="width: 100%;">Confirm Faction & Class & Return</button>
+                <p id="factionStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary); text-shadow: var(--text-shadow);"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Modern Chess. Independent Network.</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { db, ref, set, get, update } from './network.js';
+
+        const currentUser = localStorage.getItem('arena_chess_user');
+        if (!currentUser) window.location.href = 'game.html';
+
+        let selectedFaction = 'Order';
+        const orderSelect = document.getElementById('orderRankSelect');
+        const syndicateSelect = document.getElementById('syndicateRankSelect');
+        const rankWrapper = document.getElementById('rankControlWrapper');
+        const statusText = document.getElementById('factionStatus');
+
+        window.selectFaction = function(faction) {
+            selectedFaction = faction;
+            document.querySelectorAll('.faction-card').forEach(c => c.classList.remove('selected'));
+            const activeCard = document.getElementById(`card-${faction.toLowerCase()}`);
+            if (activeCard) activeCard.classList.add('selected');
+
+            if (faction === 'Order') {
+                orderSelect.style.display = 'block';
+                syndicateSelect.style.display = 'none';
+            } else {
+                orderSelect.style.display = 'none';
+                syndicateSelect.style.display = 'block';
+            }
+        };
+
+        async function loadCurrentData() {
+            statusText.style.color = "#d0d0d0";
+            statusText.innerText = "Synchronizing faction profile...";
+            try {
+                const userRef = ref(db, `arena_users/${currentUser}`);
+                const snap = await get(userRef);
+                if (snap.exists()) {
+                    const data = snap.val();
+                    if (data.faction) selectedFaction = data.faction;
+                    selectFaction(selectedFaction);
+                    
+                    if (data.rank) {
+                        if (selectedFaction === 'Order') {
+                            orderSelect.value = data.rank;
+                        } else {
+                            syndicateSelect.value = data.rank;
+                        }
+                    }
+                } else {
+                    selectFaction('Order');
+                }
+            } catch (err) {
+                console.warn("Network sync issue, defaulting to cached local storage.");
+                const cachedFaction = localStorage.getItem('arena_chess_faction') || 'Order';
+                const cachedRank = localStorage.getItem('arena_chess_rank');
+                selectFaction(cachedFaction);
+                if (cachedRank) {
+                    if (cachedFaction === 'Order') orderSelect.value = cachedRank;
+                    else syndicateSelect.value = cachedRank;
+                }
+            } finally {
+                // Reveal the fully synced rank controller element smoothly
+                rankWrapper.classList.add('ready');
+                statusText.innerText = "";
+            }
+        }
+
+        document.getElementById('saveFactionBtn').onclick = async () => {
+            const chosenRank = selectedFaction === 'Order' ? orderSelect.value : syndicateSelect.value;
+            statusText.style.color = "#ffffff";
+            statusText.innerText = "Saving faction selection...";
+
+            try {
+                await update(ref(db, `arena_users/${currentUser}`), {
+                    faction: selectedFaction,
+                    rank: chosenRank
+                });
+                
+                localStorage.setItem('arena_chess_faction', selectedFaction);
+                localStorage.setItem('arena_chess_rank', chosenRank);
+                
+                statusText.style.color = "var(--secondary)";
+                statusText.innerText = `Successfully set to [${selectedFaction} • ${chosenRank}]! Returning...`;
+                setTimeout(() => window.location.href = 'game.html', 800);
+            } catch (err) {
+                statusText.style.color = "var(--accent)";
+                statusText.innerText = "Failed to save data. Please check network connection.";
+            }
+        };
+
+        loadCurrentData();
+    </script>
+</body>
+</html>
