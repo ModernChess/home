@@ -7,15 +7,22 @@
 }
 
 :root {
-    --bg-color: #121214;
+    --bg-color: #121212;
     --card-bg: #1e1e24;
-    --text-color: #f1f1f1;
-    --text-muted: #a0a0ab;
+    --text-color: #ffffff;
+    --text-muted: #e0e0e0;
     --primary: #6c5ce7;
     --primary-hover: #5b4cc4;
     --secondary: #00cec9;
     --accent: #ff7675;
-    --border-color: #2d2d38;
+    --border-color: transparent;
+    
+    /* UI Background & Immersive Background Assets */
+    --repo-base-url: 'https://raw.githubusercontent.com/ModernChess/assets-images/main/';
+    --bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/background.jpg'); 
+    --ui-bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/uiback.png');
+    
+    --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 body {
@@ -26,19 +33,50 @@ body {
     justify-content: center;
     align-items: center;
     padding: 15px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Immersive Background Blur & Gradient Overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(rgba(18, 18, 18, 0.5), rgba(18, 18, 18, 0.5)), var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(5px);
+    transform: scale(1.05);
+    z-index: -1;
 }
 
 .container {
     width: 100%;
-    max-width: 480px; /* Perfect for mobile and framed desktop */
-    background: var(--card-bg);
+    max-width: 480px; 
+    background: var(--ui-bg-image);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-color);
+    box-shadow: none; /* Removed shadow outline to clear glass-like artifacting */
+    border: none;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    padding: 24px;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 650px;
+        padding: 40px 48px;
+        border-radius: 20px;
+    }
 }
 
 /* Header & Navigation */
@@ -46,9 +84,10 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    background: rgba(25, 25, 30, 0.8);
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    margin-bottom: 15px;
 }
 
 .logo {
@@ -67,14 +106,13 @@ header {
 }
 
 .menu-toggle {
-    background: none;
+    background: rgba(255, 255, 255, 0.05);
     border: none;
     color: var(--text-color);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 5px 10px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 30, 0.05);
     transition: background 0.2s;
 }
 
@@ -86,19 +124,19 @@ header {
     position: absolute;
     top: 45px;
     right: 0;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: rgba(20, 20, 24, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
     width: 160px;
-    display: none; /* Hidden by default */
+    display: none; 
     flex-direction: column;
     padding: 8px;
     z-index: 100;
 }
 
 .dropdown-menu.show {
-    display: flex; /* Triggered via JS toggle class */
+    display: flex; 
 }
 
 .nav-btn {
@@ -121,16 +159,16 @@ header {
 
 /* Main Sections / Tabs */
 main {
-    padding: 25px 20px;
+    padding: 10px 0;
     flex-grow: 1;
 }
 
 .tab-content {
-    display: none; /* Hidden by default */
+    display: none; 
 }
 
 .tab-content.active {
-    display: block; /* Shown when active */
+    display: block; 
     animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -143,7 +181,8 @@ main {
 .welcome-box h2 {
     font-size: 1.5rem;
     margin-bottom: 10px;
-    color: #fff;
+    color: var(--text-color);
+    text-shadow: var(--text-shadow);
 }
 
 .welcome-box p {
@@ -151,6 +190,7 @@ main {
     font-size: 0.9rem;
     margin-bottom: 25px;
     line-height: 1.4;
+    text-shadow: var(--text-shadow);
 }
 
 .cta-buttons {
@@ -172,6 +212,8 @@ main {
     cursor: pointer;
     transition: transform 0.1s, background-color 0.2s;
     border: none;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn:active {
@@ -193,19 +235,22 @@ main {
 }
 
 .outline-btn {
-    background-color: transparent;
-    border: 2px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     color: var(--text-color);
 }
 
 .outline-btn:hover {
     border-color: var(--text-muted);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Rules Section */
 .rules-box h2 {
     font-size: 1.3rem;
     margin-bottom: 15px;
+    color: var(--text-color);
+    text-shadow: var(--text-shadow);
 }
 
 .rules-list {
@@ -223,6 +268,7 @@ main {
     color: var(--text-muted);
     font-size: 0.9rem;
     line-height: 1.4;
+    text-shadow: var(--text-shadow);
 }
 
 .rules-list li span {
@@ -244,21 +290,24 @@ main {
     font-size: 1rem;
     margin-bottom: 8px;
     color: var(--text-color);
+    text-shadow: var(--text-shadow);
 }
 
 .video-wrapper video {
     width: 100%;
     border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     background: #000;
 }
 
 /* Footer */
 footer {
     text-align: center;
-    padding: 15px;
+    padding: 15px 0 0 0;
     font-size: 0.75rem;
     color: var(--text-muted);
-    border-top: 1px solid var(--border-color);
-    background: rgba(25, 25, 30, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    margin-top: 15px;
+    text-shadow: var(--text-shadow);
 }
