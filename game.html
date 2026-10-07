@@ -21,10 +21,10 @@
             background-repeat: no-repeat;
             border: none;
             box-shadow: none;
-            padding: 15px; /* Reduced slightly to prevent overflow clipping */
+            padding: 15px;
             border-radius: 20px;
             box-sizing: border-box;
-            max-width: 620px; /* Sized down slightly for a tighter layout */
+            max-width: 620px;
             margin: 0 auto;
         }
         h1, h2, h3, h4, p, span, label {
@@ -33,7 +33,6 @@
         }
         .screen { display: none; }
         .screen.active { display: block; }
-        /* Prevent ugly flashing before JS checks local cache */
         #login-screen { opacity: 0; transition: opacity 0.15s ease-in; }
         
         .auth-tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
@@ -42,7 +41,6 @@
         .player-card { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: rgba(255,255,255,0.03); margin-bottom: 5px; border-radius: 6px; font-size: 0.8rem; border: 1px solid var(--border-color); color: #ffffff; text-shadow: var(--text-shadow); box-sizing: border-box; }
         .player-badge-online { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
         
-        /* Mobile-Friendly Arena Grid with padding containment */
         .arena-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; box-sizing: border-box; }
         @media (max-width: 600px) {
             .arena-grid { grid-template-columns: 1fr; }
@@ -96,6 +94,18 @@
                         <a href="faction.html" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(231,76,60,0.1);">Faction</a>
                         <a href="avatar.html" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(46,204,113,0.1);">Avatar</a>
                         <button id="logoutBtn" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto;">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Post-Login Matchmaking & Game Mode Links -->
+                <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 15px; box-sizing: border-box; text-align: center;">
+                    <h4 style="font-size: 0.85rem; margin-bottom: 10px; color: var(--secondary);">Matchmaking & Play Modes</h4>
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                        <a href="https://modernchess.github.io/online" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play Online (Direct)</a>
+                        <a href="https://modernchess.github.io/onlineplus" target="_blank" class="btn outline-btn" style="border-color: var(--accent); color: var(--accent); font-size: 0.75rem; padding: 6px 12px; width: auto;">Play Online PLUS</a>
+                        <a href="https://modernchess.github.io/bot1" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play with Bot</a>
+                        <a href="https://modernchess.github.io/new" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play on Same Device</a>
+                        <a href="tutorial.html" class="btn outline-btn" style="border-color: var(--secondary); color: var(--secondary); font-size: 0.75rem; padding: 6px 12px; width: auto;">How to Play</a>
                     </div>
                 </div>
 
