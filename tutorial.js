@@ -1,71 +1,129 @@
-// tutorial.js - Interactive Rules & Video Preview Carousel with Compact Heading and Immersive Fullscreen-Style Video Layout
+// tutorial.js - Interactive Rules & Video Preview Carousel with Live Captions
 export const repoBaseUrl = 'https://raw.githubusercontent.com/ModernChess/assets-images/main/';
 
 export const tutorialSteps = [
     {
-        title: "1. Deadlock & Destruction",
-        desc: "Deadlock occurs when opposing unit powers are equal. Direct destruction happens when powers are unequal.",
-        video: repoBaseUrl + "1.mp4"
+        title: "1. Infantry movement",
+        desc: "Infantry units move in all directions exclusively on land, similar to a queen in chess, but with a maximum range of 2 squares. You can choose to move 1 or 2 squares away using the green and orange outline indicators. Infantry cannot enter water tiles.",
+        video: repoBaseUrl + "1.mp4",
+        captions: [
+            { time: 0.0, text: "Infantry moves on all directions in only land, like a queen piece in chess, however it has a limit." },
+            { time: 6.0, text: "It can go 2 squares away, you can choose where it goes." },
+            { time: 13.0, text: "You can choose where you go in the green outline show up and the infantry goes smoothly." },
+            { time: 22.0, text: "You just click where you want to move according to the orange outline." },
+            { time: 36.0, text: "The blue areas which is the water, the infantry cannot move there as the orange outline doesn't show." }
+        ]
     },
     {
-        title: "2. Connections & Placement",
-        desc: "Connections are established by combining both straight and diagonal alignments. Units cannot take squares occupied by others.",
-        video: repoBaseUrl + "2.mp4"
+        title: "2. Tank movement",
+        desc: "Tanks move similarly to infantry but possess an extended range of up to 3 squares instead of 2. You can select destinations 1, 2, or 3 squares away using movement outlines. Like infantry, tanks cannot traverse water terrain.",
+        video: repoBaseUrl + "2.mp4",
+        captions: [
+            { time: 0.0, text: "Tank moves like infantry, however it is a bit different." },
+            { time: 3.0, text: "It can go 3, not 2 squares away, you can choose where it goes like an infantry." },
+            { time: 8.0, text: "You can either choose 3, 2, or 1 squares away." },
+            { time: 12.0, text: "See you can choose where you go in the green outline show up and so the tank goes smoothly." },
+            { time: 18.0, text: "You just click where you want to move according to the orange outline, just like infantry." },
+            { time: 34.0, text: "As you can see, the blue areas which is the water, the tank cannot move there just like the infantry." }
+        ]
     },
     {
-        title: "3. Movement & Over-movement",
-        desc: "Units move in queen formations with restricted speed limits, and can move above other friendly or neutral units.",
-        video: repoBaseUrl + "3.mp4"
+        title: "3. Ship movement",
+        desc: "Ships operate via dedicated range controls. Toggle the range overlay on or off using the indicator button. As the ship moves across water, its active operational range moves dynamically alongside it to cover target zones.",
+        video: repoBaseUrl + "3.mp4",
+        captions: [
+            { time: 0.0, text: "Use the range button to toggle the operational range of the ship on or off." },
+            { time: 4.5, text: "As you move the ship across the water, its active range moves dynamically with it." }
+        ]
     },
     {
-        title: "3.5 Special Tactical Formations",
-        desc: "Advanced maneuvers and secondary positioning rules apply during complex board states.",
-        video: repoBaseUrl + "3.5.mp4"
+        title: "3.5 units connection",
+        desc: "Units can connect sideways, horizontally, and vertically as long as they touch directly without gaps. Connection status and cumulative combat power changes are reflected dynamically on the unit's power label.",
+        video: repoBaseUrl + "3.5.mp4",
+        captions: [
+            { time: 0.0, text: "Units can connect sideways, horizontally, and vertically with no gaps between them." },
+            { time: 5.0, text: "Power labels change dynamically to reflect cumulative power updates with each connection." }
+        ]
     },
     {
-        title: "4. Unit Types & Terrains",
-        desc: "Land units consist of tanks, infantry, and artillery. Water units consist of ships. Land units cannot cross water and vice versa.",
-        video: repoBaseUrl + "4.mp4"
+        title: "4. Using infantry to destroy infantry",
+        desc: "Combat engagements resolve based on unit power values. Advancing lower-power units directly into stronger or equal formations results in unit destruction or stalemate locks.",
+        video: repoBaseUrl + "4.mp4",
+        captions: [
+            { time: 0.0, text: "Combat power determines outcomes when opposing units meet on the grid." },
+            { time: 4.0, text: "Advancing unsupported units into stronger formations leads to immediate destruction." }
+        ]
     },
     {
-        title: "5. Economy & Base Capture",
-        desc: "Capturing mines yields gold coins used to buy and deploy units. Reach within connecting squares to capture bases.",
-        video: repoBaseUrl + "5.mp4"
+        title: "5. How tanks destroy",
+        desc: "Tanks carry a higher combat power rating of 2 compared to an infantry's power of 1. Advancing a tank into weaker opposing units allows it to systematically eliminate enemy formations.",
+        video: repoBaseUrl + "5.mp4",
+        captions: [
+            { time: 0.0, text: "The combat power of a tank is 2, while infantry power is rated at 1." },
+            { time: 4.5, text: "Tanks advance over opposing infantry units to systematically eliminate them." }
+        ]
     },
     {
-        title: "6. Strategic Reinforcements",
-        desc: "Deploy support units strategically to maintain pressure lines across the board.",
-        video: repoBaseUrl + "6.mp4"
+        title: "6. Using tank and infantry connections to destroy",
+        desc: "Combining tanks and infantry into connected networks pools their combat power. For example, a tank combined with infantry units scales total team power, allowing you to overwhelm opposing forces.",
+        video: repoBaseUrl + "6.mp4",
+        captions: [
+            { time: 0.0, text: "Team power totals combine based on connected tanks and infantry formations." },
+            { time: 5.0, text: "Pooling higher combined power allows you to overwhelm opposing enemy lines." }
+        ]
     },
     {
-        title: "7. Sector Control",
-        desc: "Dominate central sectors to unlock additional income multipliers and tactical options.",
-        video: repoBaseUrl + "7.mp4"
+        title: "7. Using infantry to destroy tanks",
+        desc: "Infantry units can successfully support larger pushes or counter isolated heavy units when reinforced properly through connected formations to overcome power deficits.",
+        video: repoBaseUrl + "7.mp4",
+        captions: [
+            { time: 0.0, text: "Infantry units can coordinate together to counter isolated heavy tanks." },
+            { time: 5.0, text: "Proper connections help offset individual power deficits during engagements." }
+        ]
     },
     {
-        title: "8. Defensive Fortifications",
-        desc: "Establish stronghold perimeters to withstand heavy opposing artillery onslaughts.",
-        video: repoBaseUrl + "8.mp4"
+        title: "8. Stalemate if infantry and tanks are together",
+        desc: "When opposing units meet with equal combat power, they enter a locked deadlock state indicated by a lock symbol. Locked units cannot be moved by either team until reinforcements break the balance.",
+        video: repoBaseUrl + "8.mp4",
+        captions: [
+            { time: 0.0, text: "When opposing forces meet with equal power, they enter a locked deadlock state." },
+            { time: 4.5, text: "A lock symbol appears, preventing either team from moving the locked units." }
+        ]
     },
     {
-        title: "9. Flashing Maneuvers",
-        desc: "Execute swift flanking operations to disrupt enemy supply chains and line of sight.",
-        video: repoBaseUrl + "9.mp4"
+        title: "9. Statemate if tank and tank are together",
+        desc: "Equal-power tank confrontations result in a mutual stalemate lock. Bringing nearby infantry or support units to connect with the tank provides extra power, breaking the lock and destroying the enemy.",
+        video: repoBaseUrl + "9.mp4",
+        captions: [
+            { time: 0.0, text: "Tank-on-tank equal power confrontations result in a mutual stalemate lock." },
+            { time: 4.5, text: "Bringing an infantry unit to connect provides extra power to break the lock and destroy the target." }
+        ]
     },
     {
-        title: "10. Endgame Breakthrough",
-        desc: "Drive your remaining heavy units straight through the opponent's core defense line.",
-        video: repoBaseUrl + "10.mp4"
+        title: "10. Using range of ships",
+        desc: "Ship range overlays highlight hostile territory. Any enemy infantry or tank stepping inside an active ship range zone is instantly targeted and destroyed.",
+        video: repoBaseUrl + "10.mp4",
+        captions: [
+            { time: 0.0, text: "Activate the range overlay button to preview the active area of effect of the ship." },
+            { time: 5.0, text: "Any enemy infantry or tank stepping inside the ship's range is instantly destroyed." }
+        ]
     },
     {
-        title: "11. Tactical Retreats",
-        desc: "Reposition damaged units back to safe zones for repairs and regrouping.",
-        video: repoBaseUrl + "11.mp4"
+        title: "11. Mutual destruction of ships",
+        desc: "Opposing naval units intersecting within active combat ranges engage in simultaneous tactical elimination.",
+        video: repoBaseUrl + "11.mp4",
+        captions: [
+            { time: 0.0, text: "Naval units intersecting within active weapon ranges trigger mutual elimination." }
+        ]
     },
     {
-        title: "12. Ultimate Victory",
-        desc: "Secure the final objective zone to achieve total supremacy and win the match.",
-        video: repoBaseUrl + "12.mp4"
+        title: "12. Using ships to destroy land units",
+        desc: "Maneuvering naval units closer to coastal lines extends their weapon range over land tiles, automatically eliminating enemy infantry and tanks caught within the active zone.",
+        video: repoBaseUrl + "12.mp4",
+        captions: [
+            { time: 0.0, text: "Take the ship closer to coastal shores to extend its strike range over land." },
+            { time: 4.5, text: "Enemy land units caught under the active range overlay are eliminated on contact." }
+        ]
     }
 ];
 
@@ -75,7 +133,6 @@ export function initTutorial() {
     const rulesSection = document.getElementById('rules-section');
     if (!rulesSection) return;
 
-    // Inject markup featuring smaller header and massive immersive video player (autoplay removed)
     rulesSection.innerHTML = `
         <div class="rules-box">
             <h2 style="font-size: 1.1rem; margin-bottom: 12px; opacity: 0.9;">Interactive Tutorial & Video Preview</h2>
@@ -83,12 +140,12 @@ export function initTutorial() {
             <div class="tutorial-carousel-container" style="position: relative; overflow: hidden; border-radius: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); padding: 12px; margin-bottom: 20px; text-align: center;">
                 
                 <!-- Previous Arrow Button (Left) -->
-                <button id="prevTutorialBtn" aria-label="Previous Step" style="position: absolute; left: 16px; top: 46%; transform: translateY(-50%) scaleX(-1); background: var(--primary); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,0,0,0.7); z-index: 20; transition: background 0.2s, transform 0.1s;">
+                <button id="prevTutorialBtn" aria-label="Previous Step" style="position: absolute; left: 16px; top: 40%; transform: translateY(-50%) scaleX(-1); background: var(--primary); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,0,0,0.7); z-index: 20; transition: background 0.2s, transform 0.1s;">
                     &#10148;
                 </button>
 
                 <!-- Massive Immersive Video Frame Container -->
-                <div id="videoContainerBox" style="display: flex; align-items: center; justify-content: center; position: relative; height: 420px; width: 98%; max-width: 720px; margin: 0 auto; border-radius: 8px; overflow: hidden; background: #000;">
+                <div id="videoContainerBox" style="display: flex; align-items: center; justify-content: center; position: relative; height: 380px; width: 98%; max-width: 720px; margin: 0 auto; border-radius: 8px; overflow: hidden; background: #000;">
                     
                     <video id="tutorialVideo" src="${tutorialSteps[0].video}" loop playsinline style="height: 100%; width: 100%; object-fit: contain; cursor: pointer;"></video>
                     
@@ -116,32 +173,31 @@ export function initTutorial() {
                     </div>
                 </div>
 
-                <div style="margin-top: 14px;">
-                    <h3 id="tutorialTitle" style="font-size: 1.05rem; color: var(--secondary); margin-bottom: 4px;">${tutorialSteps[0].title}</h3>
-                    <p id="tutorialDesc" style="font-size: 0.85rem; color: var(--text-muted); min-height: 40px;">${tutorialSteps[0].desc}</p>
+                <!-- LIVE CAPTION BOX (Synced to Video Time) -->
+                <div style="margin: 10px auto 4px auto; max-width: 680px; background: rgba(0, 0, 0, 0.75); border: 1px solid var(--secondary); border-radius: 6px; padding: 8px 14px; min-height: 36px; display: flex; align-items: center; justify-content: center;">
+                    <p id="liveCaptionText" style="font-size: 0.85rem; color: #ffffff; text-align: center; margin: 0; font-weight: 500; text-shadow: 1px 1px 2px rgba(0,0,0,0.9);">
+                        [Press Play to read live video captions...]
+                    </p>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <h3 id="tutorialTitle" style="font-size: 1.05rem; color: var(--secondary); margin-bottom: 6px;">${tutorialSteps[0].title}</h3>
+                    
+                    <!-- Collapsible Deep-Dive Explanation Section -->
+                    <div style="margin: 0 auto; max-width: 680px; text-align: left;">
+                        <button id="toggleDescBtn" class="btn outline-btn" style="font-size: 0.75rem; padding: 5px 10px; width: 100%; background: rgba(255,255,255,0.05); border-color: var(--border-color); color: var(--secondary);">
+                            ▼ Show Deep-Dive Explanation
+                        </button>
+                        <div id="tutorialDescContainer" style="display: none; margin-top: 6px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 6px;">
+                            <p id="tutorialDesc" style="font-size: 0.8rem; color: #ddd; line-height: 1.4; margin: 0;">${tutorialSteps[0].desc}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Next Arrow Button (Right) -->
-                <button id="nextTutorialBtn" aria-label="Next Step" style="position: absolute; right: 16px; top: 46%; transform: translateY(-50%); background: var(--primary); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,0,0,0.7); z-index: 20; transition: background 0.2s, transform 0.1s;">
+                <button id="nextTutorialBtn" aria-label="Next Step" style="position: absolute; right: 16px; top: 40%; transform: translateY(-50%); background: var(--primary); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 4px 15px rgba(0,0,0,0.7); z-index: 20; transition: background 0.2s, transform 0.1s;">
                     &#10148;
                 </button>
-            </div>
-
-            <!-- Full Manual Rules Toggle or Accordion Button -->
-            <div style="text-align: center; margin-bottom: 15px;">
-                <button class="btn outline-btn" id="toggleFullRulesBtn" style="font-size: 0.8rem; padding: 8px;">View Complete Detailed Rulebook</button>
-            </div>
-
-            <div id="fullRulesContainer" style="display: none; max-height: 250px; overflow-y: auto; text-align: left; padding-right: 5px; font-size: 0.8rem; color: var(--text-muted);">
-                <ul class="rules-list" style="margin-top: 10px;">
-                    <li><span>1</span> <strong>Deadlock:</strong> When equal powers meet.</li>
-                    <li><span>2</span> <strong>Destruction:</strong> When unequal powers clash.</li>
-                    <li><span>3</span> <strong>Connections:</strong> Made while added both straight and diagonal.</li>
-                    <li><span>4</span> <strong>Placement:</strong> Cannot take others' standing places.</li>
-                    <li><span>5</span> <strong>Movement:</strong> Move in queen formation with limited speed.</li>
-                    <li><span>6</span> <strong>Ship Spawning:</strong> Must spawn in anchor points free of enemies.</li>
-                    <li><span>7</span> <strong>Economy:</strong> Capturing mines yields single gold coins.</li>
-                </ul>
             </div>
 
             <button class="btn primary-btn" onclick="switchTab('home')" style="margin-top: 15px;">Back to Home</button>
@@ -155,6 +211,9 @@ export function initTutorial() {
     const videoControlsOverlay = document.getElementById('videoControlsOverlay');
     const titleEl = document.getElementById('tutorialTitle');
     const descEl = document.getElementById('tutorialDesc');
+    const liveCaptionText = document.getElementById('liveCaptionText');
+    const toggleDescBtn = document.getElementById('toggleDescBtn');
+    const tutorialDescContainer = document.getElementById('tutorialDescContainer');
     const ytOverlay = document.getElementById('ytOverlay');
     
     const rewindBtn = document.getElementById('rewindBtn');
@@ -166,6 +225,12 @@ export function initTutorial() {
     const durationText = document.getElementById('durationText');
 
     let hideControlsTimeout = null;
+
+    toggleDescBtn.onclick = () => {
+        const isHidden = tutorialDescContainer.style.display === 'none';
+        tutorialDescContainer.style.display = isHidden ? 'block' : 'none';
+        toggleDescBtn.innerText = isHidden ? '▲ Hide Deep-Dive Explanation' : '▼ Show Deep-Dive Explanation';
+    };
 
     function showControls() {
         videoControlsOverlay.style.opacity = '1';
@@ -191,12 +256,27 @@ export function initTutorial() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
+    // Live Caption Synchronizer Loop
     videoEl.addEventListener('timeupdate', () => {
         if (!isNaN(videoEl.duration) && videoEl.duration > 0) {
             const progressPercent = (videoEl.currentTime / videoEl.duration) * 100;
             videoTimeline.value = progressPercent;
             currentTimeText.innerText = formatTime(videoEl.currentTime);
             durationText.innerText = formatTime(videoEl.duration);
+        }
+
+        // Match current timestamp to captions array
+        const currentStep = tutorialSteps[currentStepIndex];
+        if (currentStep.captions && currentStep.captions.length > 0) {
+            let activeCaption = currentStep.captions[0].text;
+            for (let i = 0; i < currentStep.captions.length; i++) {
+                if (videoEl.currentTime >= currentStep.captions[i].time) {
+                    activeCaption = currentStep.captions[i].text;
+                }
+            }
+            liveCaptionText.innerText = activeCaption;
+        } else {
+            liveCaptionText.innerText = "No captions available for this step.";
         }
     });
 
@@ -276,10 +356,10 @@ export function initTutorial() {
             const step = tutorialSteps[currentStepIndex];
 
             videoEl.src = step.video;
-            // Removed forced auto-play on slide switch so user controls playback explicitly
             playPauseBtn.innerText = "Play";
             titleEl.innerText = step.title;
             descEl.innerText = step.desc;
+            liveCaptionText.innerText = "[Press Play to read live video captions...]";
 
             videoContainerBox.style.transition = 'none';
             videoContainerBox.style.transform = 'scale(0.95)';
@@ -295,11 +375,4 @@ export function initTutorial() {
 
     nextBtn.addEventListener('click', () => changeSlide(1));
     prevBtn.addEventListener('click', () => changeSlide(-1));
-
-    document.getElementById('toggleFullRulesBtn').onclick = () => {
-        const container = document.getElementById('fullRulesContainer');
-        const isHidden = container.style.display === 'none';
-        container.style.display = isHidden ? 'block' : 'none';
-        document.getElementById('toggleFullRulesBtn').innerText = isHidden ? 'Hide Complete Detailed Rulebook' : 'View Complete Detailed Rulebook';
-    };
 }
