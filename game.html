@@ -46,6 +46,93 @@
             .arena-grid { grid-template-columns: 1fr; }
         }
 
+        /* Custom Solid Fill Buttons with Dynamic Outline */
+        .portal-btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .portal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 1. Play Online - Green Fill with Dynamic Outline */
+        .btn-green-fill {
+            background-color: #27ae60;
+            color: #ffffff;
+            border: 2px solid #2ecc71;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            width: 100%;
+        }
+
+        /* 2. Play with Bot - Blue Fill */
+        .btn-blue-fill {
+            background-color: #2980b9;
+            color: #ffffff;
+            border: 2px solid #3498db;
+            box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            width: auto;
+        }
+
+        /* 3. Play on Same Device - Red Fill */
+        .btn-red-fill {
+            background-color: #c0392b;
+            color: #ffffff;
+            border: 2px solid #e74c3c;
+            box-shadow: 0 0 6px rgba(231, 76, 60, 0.4);
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            width: auto;
+        }
+
+        /* Smooth lerping pulse animation for How to Play */
+        @keyframes pulseLerp {
+            0% {
+                transform: scale(1) translateX(0);
+                box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            }
+            50% {
+                transform: scale(1.06) translateX(-3px);
+                box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+            }
+            100% {
+                transform: scale(1) translateX(0);
+                box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* 4. How to Play - White Fill with Animation */
+        .btn-white-fill {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 2px solid #bdc3c7;
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            width: auto;
+        }
+        .animated-lerp-btn {
+            animation: pulseLerp 1.8s ease-in-out infinite;
+        }
+
+        /* 5. MChessPLUS - Smaller Bottom Button */
+        .btn-small-plus {
+            background-color: #8e44ad;
+            color: #ffffff;
+            border: 2px solid #9b59b6;
+            box-shadow: 0 0 6px rgba(155, 89, 182, 0.4);
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            width: auto;
+        }
+
         .global-chat-msg { font-size: 0.8rem; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 4px; word-break: break-word; color: #ffffff; text-shadow: var(--text-shadow); }
         .global-chat-msg span { color: var(--secondary); font-weight: 600; text-shadow: var(--text-shadow); }
         footer p {
@@ -100,12 +187,22 @@
                 <!-- Post-Login Matchmaking & Game Mode Links -->
                 <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 15px; box-sizing: border-box; text-align: center;">
                     <h4 style="font-size: 0.85rem; margin-bottom: 10px; color: var(--secondary);">Matchmaking & Play Modes</h4>
-                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                        <a href="https://modernchess.github.io/online" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play Online (Direct)</a>
-                        <a href="https://modernchess.github.io/onlineplus" target="_blank" class="btn outline-btn" style="border-color: var(--accent); color: var(--accent); font-size: 0.75rem; padding: 6px 12px; width: auto;">Play Online PLUS</a>
-                        <a href="https://modernchess.github.io/bot1" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play with Bot</a>
-                        <a href="https://modernchess.github.io/new" target="_blank" class="btn outline-btn" style="font-size: 0.75rem; padding: 6px 12px; width: auto;">Play on Same Device</a>
-                        <a href="tutorial.html" class="btn outline-btn" style="border-color: var(--secondary); color: var(--secondary); font-size: 0.75rem; padding: 6px 12px; width: auto;">How to Play</a>
+                    
+                    <!-- Top Play Online Button (Green Fill) -->
+                    <div style="margin-bottom: 10px;">
+                        <a href="https://modernchess.github.io/online" target="_blank" class="portal-btn btn-green-fill">Play Online</a>
+                    </div>
+
+                    <!-- Middle Action Row -->
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+                        <a href="https://modernchess.github.io/bot1" target="_blank" class="portal-btn btn-blue-fill">Play with Bot</a>
+                        <a href="https://modernchess.github.io/new" target="_blank" class="portal-btn btn-red-fill">Play on Same Device</a>
+                        <a href="tutorial.html" class="portal-btn btn-white-fill animated-lerp-btn">How to Play</a>
+                    </div>
+
+                    <!-- Bottom Smaller MChessPLUS Button -->
+                    <div>
+                        <a href="https://modernchess.github.io/onlineplus" target="_blank" class="portal-btn btn-small-plus">Play MChessPLUS</a>
                     </div>
                 </div>
 
