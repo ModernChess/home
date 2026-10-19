@@ -205,14 +205,12 @@ class FloatingLogger {
     }
 
     initGlobalErrorHandlers() {
-        // Automatically capture syntax/runtime exceptions and exact file line numbers
         window.onerror = (msg, source, lineno, colno, error) => {
             const fileName = source ? source.split('/').pop() : 'inline-script';
             const location = `${fileName}:${lineno}:${colno}`;
             this.log(`Runtime Error: ${msg}`, 'error', location);
         };
 
-        // Capture unhandled asynchronous promise failures
         window.addEventListener('unhandledrejection', (event) => {
             const reason = event.reason ? event.reason.message || event.reason : 'Unknown Promise Rejection';
             this.log(`Promise Rejection: ${reason}`, 'error', 'Async/Promise');
@@ -224,4 +222,9 @@ class FloatingLogger {
     }
 }
 
-export const globalLogger = new FloatingLogger();
+// Global window attachment for seamless cross-script access
+if (!window.globalLogger) {
+    window.globalLogger = new FloatingLogger();
+}
+
+export const globalLogger = window.globalLogger;
