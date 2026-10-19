@@ -219,7 +219,10 @@ function updateWelcomeDisplay(username, avatar, faction, rank) {
     const welcomeUser = document.getElementById('welcomeUser');
     if (welcomeUser) {
         const factionColor = faction === 'Order' ? 'var(--secondary)' : 'var(--accent)';
-        welcomeUser.innerHTML = `<span style="font-size: 1.1rem; margin-right: 4px; vertical-align: middle;">${avatar}</span> <span style="color: ${factionColor}; font-weight: 600;">[${faction} • ${rank}]</span> <strong>${username}</strong>`;
+        const avatarHTML = (avatar && (avatar.startsWith('data:image/') || avatar.startsWith('http')))
+            ? `<img src="${avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px;">`
+            : `<span style="font-size: 1.1rem; margin-right: 4px; vertical-align: middle;">${avatar || '😀'}</span>`;
+        welcomeUser.innerHTML = `${avatarHTML} <span style="color: ${factionColor}; font-weight: 600;">[${faction} • ${rank}]</span> <strong>${username}</strong>`;
     }
 }
 
@@ -233,26 +236,63 @@ function initGlobalChat() {
         if (!snapshot.exists()) return;
 
         const data = snapshot.val();
+        let lastSender = null;
+        let lastTimestamp = 0;
+
         Object.values(data).forEach(msg => {
             if (!msg || typeof msg.message !== 'string') return;
 
+            const msgSender = msg.sender || 'Unknown';
             const msgAvatar = msg.avatar || '😀';
             const msgFaction = msg.faction || 'Order';
             const msgRank = msg.rank || 'Trainee ⭐';
-            const factionTagColor = msgFaction === 'Order' ? '#2ecc71' : '#e74c3c';
+            const factionTagColor = msgFaction === 'Order' ? '#00cec9' : '#ff7675';
+            
+            // Format timestamp nicely
+            let timeString = '';
+            if (msg.timestamp) {
+                const date = new Date(msg.timestamp);
+                timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else {
+                timeString = 'Just now';
+            }
 
-            const div = document.createElement('div');
-            div.className = 'global-chat-msg';
-            // Updated chat display to include both faction and tier rank stars/comets clearly
-            div.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px; flex-wrap: wrap;">
-                    <span>${msgAvatar}</span>
-                    <span style="color: ${factionTagColor}; font-size: 0.75rem; font-weight: 700;">[${msgFaction} • ${msgRank}]</span>
-                    <span style="color: var(--secondary); font-weight: 600;">${msg.sender || 'Unknown'}:</span>
-                </div>
-                <div style="padding-left: 20px; word-break: break-word;">${escapeHtml(msg.message)}</div>
-            `;
-            chatMessagesContainer.appendChild(div);
+            // Fuse messages if sent by the same user within 3 minutes
+            const isFused = (msgSender === lastSender) && (msg.timestamp - lastTimestamp < 180000);
+            lastSender = msgSender;
+            if (msg.timestamp) lastTimestamp = msg.timestamp;
+
+            const avatarHTML = (msgAvatar.startsWith('data:image/') || msgAvatar.startsWith('http'))
+                ? `<img src="${msgAvatar}" class="chat-user-avatar">`
+                : `<span class="chat-user-emoji">${msgAvatar}</span>`;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message-row ${isFused ? 'fused-message' : ''}`;
+
+            if (!isFused) {
+                messageDiv.innerHTML = `
+                    <div class="chat-message-header">
+                        <div class="chat-sender-info">
+                            ${avatarHTML}
+                            <span class="chat-sender-name">${escapeHtml(msgSender)}</span>
+                            <span class="chat-faction-badge" style="color: ${factionTagColor}; border-color: ${factionTagColor};">[${msgFaction} • ${msgRank}]</span>
+                        </div>
+                        <span class="chat-timestamp">${timeString}</span>
+                    </div>
+                    <div class="chat-bubble-container">
+                        <div class="chat-bubble">${escapeHtml(msg.message)}</div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="chat-bubble-container fused">
+                        <div class="chat-bubble">${escapeHtml(msg.message)}</div>
+                        <span class="chat-timestamp-fused">${timeString}</span>
+                    </div>
+                `;
+            }
+
+            chatMessagesContainer.appendChild(messageDiv);
         });
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     });
@@ -280,20 +320,23 @@ function initActivePlayersListener() {
                 const playerAvatar = status.avatar || '😀';
                 const playerFaction = status.faction || 'Order';
                 const playerRank = status.rank || 'Trainee ⭐';
-                const factionColor = playerFaction === 'Order' ? '#2ecc71' : '#e74c3c';
+                const factionColor = playerFaction === 'Order' ? '#00cec9' : '#ff7675';
+
+                const avatarHTML = (playerAvatar.startsWith('data:image/') || playerAvatar.startsWith('http'))
+                    ? `<img src="${playerAvatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">`
+                    : `<span style="font-size: 1.2rem;">${playerAvatar}</span>`;
 
                 const div = document.createElement('div');
                 div.className = 'player-card';
-                // Updated active player card display to show the complete star or comet tier badge
                 div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.2rem;">${playerAvatar}</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="player-avatar-wrapper">${avatarHTML}</div>
                         <div>
-                            <div><span class="player-badge-online"></span><strong>${name}</strong></div>
-                            <div style="font-size: 0.75rem; color: ${factionColor}; font-weight: 600;">${playerFaction} • ${playerRank}</div>
+                            <div style="font-weight: 600; font-size: 0.9rem; color: #fff;"><span class="player-badge-online"></span>${escapeHtml(name)}</div>
+                            <div style="font-size: 0.72rem; color: ${factionColor}; font-weight: 600; letter-spacing: 0.5px;">[${playerFaction} • ${playerRank}]</div>
                         </div>
                     </div>
-                    <span style="font-size: 0.75rem; color: #2ecc71;">Online</span>
+                    <span style="font-size: 0.72rem; color: #00cec9; background: rgba(0,206,201,0.1); padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(0,206,201,0.3);">Online</span>
                 `;
                 playersContainer.appendChild(div);
             }
