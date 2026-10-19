@@ -1,4 +1,4 @@
-// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, Factions, Ranks, and Fast Cache
+// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, Factions, Ranks, and Frame Retry Mechanisms
 import { db, ref, set, get, onValue, push, remove, update, onDisconnect, serverTimestamp } from './network.js';
 import { globalLogger } from './logger.js';
 
@@ -17,7 +17,6 @@ window.switchAuthMode = function(mode) {
     if (btn) btn.innerText = mode === 'signup' ? 'Register & Sign Up' : 'Login';
 };
 
-// Native browser-based cryptographic hash function (SHA-256) with test console logging
 async function hashPassword(password) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
@@ -226,14 +225,38 @@ function updateWelcomeDisplay(username, avatar, faction, rank) {
     }
 }
 
+// Global Manual Retry Hooks for Frames
+window.reloadChatFrame = function() { initGlobalChat(); };
+window.reloadPlayersFrame = function() { initActivePlayersListener(); };
+
 function initGlobalChat() {
     const chatMessagesContainer = document.getElementById('globalChatMessages');
     if (!chatMessagesContainer) return;
     
+    // Show isolated loading state with manual retry option
+    chatMessagesContainer.innerHTML = `
+        <div id="chatLoader" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#d0d0d0; font-size:0.75rem; gap:6px;">
+            <div style="width:18px; height:18px; border:2px solid rgba(255,255,255,0.2); border-top-color:var(--secondary); border-radius:50%; animation: spin 0.8s linear infinite;"></div>
+            <span>Connecting chat... <button onclick="window.reloadChatFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold; padding:0;">Retry</button></span>
+        </div>
+    `;
+
+    // Self-recovery fallback timer (4 seconds)
+    const timeout = setTimeout(() => {
+        const loader = document.getElementById('chatLoader');
+        if (loader) {
+            loader.innerHTML = `<span>Chat delayed. <button onclick="window.reloadChatFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold;">Reload Frame</button></span>`;
+        }
+    }, 4000);
+
     const chatRef = ref(db, 'arena_globalChat');
     onValue(chatRef, (snapshot) => {
+        clearTimeout(timeout);
         chatMessagesContainer.innerHTML = '';
-        if (!snapshot.exists()) return;
+        if (!snapshot.exists()) {
+            chatMessagesContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.75rem; padding:10px;">No messages yet.</div>`;
+            return;
+        }
 
         const data = snapshot.val();
         let lastSender = null;
@@ -248,7 +271,6 @@ function initGlobalChat() {
             const msgRank = msg.rank || 'Trainee ⭐';
             const factionTagColor = msgFaction === 'Order' ? '#00cec9' : '#ff7675';
             
-            // Format timestamp nicely
             let timeString = '';
             if (msg.timestamp) {
                 const date = new Date(msg.timestamp);
@@ -257,37 +279,39 @@ function initGlobalChat() {
                 timeString = 'Just now';
             }
 
-            // Fuse messages if sent by the same user within 3 minutes
             const isFused = (msgSender === lastSender) && (msg.timestamp - lastTimestamp < 180000);
             lastSender = msgSender;
             if (msg.timestamp) lastTimestamp = msg.timestamp;
 
             const avatarHTML = (msgAvatar.startsWith('data:image/') || msgAvatar.startsWith('http'))
-                ? `<img src="${msgAvatar}" class="chat-user-avatar">`
-                : `<span class="chat-user-emoji">${msgAvatar}</span>`;
+                ? `<img src="${msgAvatar}" class="chat-user-avatar" style="width:22px; height:22px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:4px;">`
+                : `<span class="chat-user-emoji" style="margin-right:4px; vertical-align:middle;">${msgAvatar}</span>`;
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message-row ${isFused ? 'fused-message' : ''}`;
+            messageDiv.style.marginBottom = '6px';
+            messageDiv.style.fontSize = '0.8rem';
+            messageDiv.style.wordBreak = 'break-word';
 
             if (!isFused) {
                 messageDiv.innerHTML = `
-                    <div class="chat-message-header">
-                        <div class="chat-sender-info">
+                    <div class="chat-message-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                        <div class="chat-sender-info" style="display:flex; align-items:center; gap:4px;">
                             ${avatarHTML}
-                            <span class="chat-sender-name">${escapeHtml(msgSender)}</span>
-                            <span class="chat-faction-badge" style="color: ${factionTagColor}; border-color: ${factionTagColor};">[${msgFaction} • ${msgRank}]</span>
+                            <span class="chat-sender-name" style="font-weight:600; color:var(--secondary);">${escapeHtml(msgSender)}</span>
+                            <span class="chat-faction-badge" style="font-size:0.65rem; color:${factionTagColor};">[${msgFaction} • ${msgRank}]</span>
                         </div>
-                        <span class="chat-timestamp">${timeString}</span>
+                        <span class="chat-timestamp" style="font-size:0.65rem; color:var(--text-muted);">${timeString}</span>
                     </div>
-                    <div class="chat-bubble-container">
+                    <div class="chat-bubble-container" style="background:rgba(255,255,255,0.05); padding:6px 8px; border-radius:6px; margin-left:26px;">
                         <div class="chat-bubble">${escapeHtml(msg.message)}</div>
                     </div>
                 `;
             } else {
                 messageDiv.innerHTML = `
-                    <div class="chat-bubble-container fused">
+                    <div class="chat-bubble-container fused" style="background:rgba(255,255,255,0.05); padding:6px 8px; border-radius:6px; margin-left:26px; display:flex; justify-content:space-between; align-items:center;">
                         <div class="chat-bubble">${escapeHtml(msg.message)}</div>
-                        <span class="chat-timestamp-fused">${timeString}</span>
+                        <span class="chat-timestamp-fused" style="font-size:0.65rem; color:var(--text-muted);">${timeString}</span>
                     </div>
                 `;
             }
@@ -295,6 +319,9 @@ function initGlobalChat() {
             chatMessagesContainer.appendChild(messageDiv);
         });
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }, (error) => {
+        globalLogger.log(`Chat frame error: ${error.message}`, "error");
+        chatMessagesContainer.innerHTML = `<div style="color:var(--accent); text-align:center; font-size:0.75rem; padding:10px;">Failed to load chat. <button onclick="window.reloadChatFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold;">Retry</button></div>`;
     });
 }
 
@@ -303,11 +330,27 @@ function initActivePlayersListener() {
     const onlineCountText = document.getElementById('onlineCountText');
     if (!playersContainer) return;
 
+    playersContainer.innerHTML = `
+        <div id="playersLoader" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#d0d0d0; font-size:0.75rem; gap:6px; padding:15px;">
+            <div style="width:18px; height:18px; border:2px solid rgba(255,255,255,0.2); border-top-color:var(--secondary); border-radius:50%; animation: spin 0.8s linear infinite;"></div>
+            <span>Loading players... <button onclick="window.reloadPlayersFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold; padding:0;">Retry</button></span>
+        </div>
+    `;
+
+    const timeout = setTimeout(() => {
+        const loader = document.getElementById('playersLoader');
+        if (loader) {
+            loader.innerHTML = `<span>Players list delayed. <button onclick="window.reloadPlayersFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold;">Reload Frame</button></span>`;
+        }
+    }, 4000);
+
     const presenceRef = ref(db, 'arena_presence');
     onValue(presenceRef, (snapshot) => {
+        clearTimeout(timeout);
         playersContainer.innerHTML = '';
         if (!snapshot.exists()) {
             if (onlineCountText) onlineCountText.innerText = "Active Players (0)";
+            playersContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.75rem; padding:10px;">No players online</div>`;
             return;
         }
 
@@ -343,6 +386,9 @@ function initActivePlayersListener() {
         });
 
         if (onlineCountText) onlineCountText.innerText = `Active Players (${onlineCount})`;
+    }, (error) => {
+        globalLogger.log(`Players frame error: ${error.message}`, "error");
+        playersContainer.innerHTML = `<div style="color:var(--accent); text-align:center; font-size:0.75rem; padding:10px;">Failed to load active players. <button onclick="window.reloadPlayersFrame()" style="background:none; border:none; color:var(--secondary); cursor:pointer; text-decoration:underline; font-weight:bold;">Retry</button></div>`;
     });
 }
 
