@@ -53,12 +53,15 @@
             text-align: center; 
             transition: all 0.2s ease; 
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
         }
         .avatar-option:hover { background: rgba(255,255,255,0.08); border-color: var(--secondary); transform: scale(1.05); }
         .avatar-option.selected { border-color: var(--secondary); background: rgba(46, 204, 113, 0.15); box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
         .current-preview { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem; }
         
-        /* Precautionary loading indicator styling */
         #gridLoadingNotice {
             font-size: 0.85rem;
             color: #d0d0d0;
@@ -82,12 +85,18 @@
 
         <main>
             <div class="welcome-box" style="text-align: center;">
-                <h2>Select Your Profile Emoji</h2>
-                <p>Pick one of 25 avatars to represent you in matches and global chat.</p>
+                <h2>Select Your Avatar or Upload Image</h2>
+                <p>Pick one of 25 preset emojis or upload your own custom image avatar.</p>
                 
                 <div class="current-preview">
                     <span>Selected:</span>
-                    <span id="selectedEmojiPreview" style="font-size: 2rem;">😀</span>
+                    <div id="selectedEmojiPreview" style="font-size: 2rem; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px;">😀</div>
+                </div>
+
+                <!-- Custom Image Upload Option -->
+                <div style="margin: 12px 0; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); box-sizing: border-box;">
+                    <input type="file" id="customAvatarUpload" accept="image/*" style="display: none;">
+                    <button type="button" class="btn outline-btn" onclick="document.getElementById('customAvatarUpload').click()" style="width: 100%; font-size: 0.85rem;">📁 Upload Custom Image Avatar</button>
                 </div>
 
                 <!-- Precautionary Loading Wrapper -->
@@ -127,21 +136,29 @@
         const preview = document.getElementById('selectedEmojiPreview');
         const statusText = document.getElementById('avatarStatus');
         const loadingNotice = document.getElementById('gridLoadingNotice');
+        const customUpload = document.getElementById('customAvatarUpload');
+
+        function updatePreview(val) {
+            if (val && (val.startsWith('data:image/') || val.startsWith('http://') || val.startsWith('https://'))) {
+                preview.innerHTML = `<img src="${val}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                preview.innerText = val || '😀';
+            }
+        }
 
         async function initAvatarScreen() {
             try {
-                // Precautionary wait for network retrieval of current avatar state
                 const userRef = ref(db, `arena_users/${currentUser}/avatar`);
                 const snap = await get(userRef);
                 if (snap.exists()) {
                     chosenEmoji = snap.val();
-                    preview.innerText = chosenEmoji;
+                    updatePreview(chosenEmoji);
                 }
             } catch (err) {
                 console.warn("Using local cache fallback due to network lag.");
                 const cached = localStorage.getItem('arena_chess_avatar');
                 if (cached) chosenEmoji = cached;
-                preview.innerText = chosenEmoji;
+                updatePreview(chosenEmoji);
             } finally {
                 renderGrid();
             }
@@ -155,17 +172,28 @@
                 btn.innerText = emoji;
                 btn.onclick = () => {
                     chosenEmoji = emoji;
-                    preview.innerText = emoji;
+                    updatePreview(chosenEmoji);
                     document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
                     btn.classList.add('selected');
                 };
                 grid.appendChild(btn);
             });
 
-            // Safely remove loading notice and reveal grid with transition
             loadingNotice.style.display = 'none';
             grid.classList.add('loaded');
         }
+
+        customUpload.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                chosenEmoji = event.target.result;
+                updatePreview(chosenEmoji);
+                document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            };
+            reader.readAsDataURL(file);
+        };
 
         document.getElementById('saveAvatarBtn').onclick = async () => {
             statusText.style.color = "#ffffff";
