@@ -11,67 +11,38 @@
             --ui-bg-image: url('https://raw.githubusercontent.com/ModernChess/assets-images/main/uiback.png');
             --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8);
         }
-        body {
-            color: #ffffff;
-        }
+        body { color: #ffffff; }
         .container {
-            background: var(--ui-bg-image);
-            background-size: 100% 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: none;
-            box-shadow: none;
-            padding: 15px;
-            border-radius: 20px;
-            box-sizing: border-box;
-            max-width: 480px;
-            margin: 0 auto;
+            background: var(--ui-bg-image); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+            border: none; box-shadow: none; padding: 15px; border-radius: 20px; box-sizing: border-box; max-width: 480px; margin: 0 auto;
         }
-        h1, h2, h3, p, span {
-            color: #ffffff;
-            text-shadow: var(--text-shadow);
-        }
+        h1, h2, h3, p, span { color: #ffffff; text-shadow: var(--text-shadow); }
         .avatar-grid { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 8px; 
-            margin: 15px 0; 
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.3s ease-in;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; box-sizing: border-box;
+            opacity: 0; transition: opacity 0.3s ease-in; min-height: 280px; position: relative;
         }
-        .avatar-grid.loaded {
-            opacity: 1;
-        }
+        .avatar-grid.loaded { opacity: 1; }
         .avatar-option { 
-            font-size: 1.8rem; 
-            background: rgba(255,255,255,0.03); 
-            border: 2px solid var(--border-color); 
-            border-radius: 10px; 
-            padding: 8px; 
-            cursor: pointer; 
-            text-align: center; 
-            transition: all 0.2s ease; 
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 50px;
+            font-size: 1.8rem; background: rgba(255,255,255,0.03); border: 2px solid var(--border-color); border-radius: 10px; 
+            padding: 8px; cursor: pointer; text-align: center; transition: all 0.2s ease; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; height: 50px;
         }
         .avatar-option:hover { background: rgba(255,255,255,0.08); border-color: var(--secondary); transform: scale(1.05); }
         .avatar-option.selected { border-color: var(--secondary); background: rgba(46, 204, 113, 0.15); box-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
         .current-preview { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem; }
         
-        #gridLoadingNotice {
-            font-size: 0.85rem;
-            color: #d0d0d0;
-            margin: 20px 0;
-            font-style: italic;
+        /* Isolated Frame Loading Overlay */
+        .frame-loader {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 18, 20, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 10px; z-index: 10; gap: 8px; font-size: 0.85rem; color: #d0d0d0;
         }
-        footer p {
-            color: #ffffff;
-            text-shadow: var(--text-shadow);
+        .spinner {
+            width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--secondary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        footer p { color: #ffffff; text-shadow: var(--text-shadow); }
     </style>
 </head>
 <body>
@@ -93,19 +64,22 @@
                     <div id="selectedEmojiPreview" style="font-size: 2rem; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px;">😀</div>
                 </div>
 
-                <!-- Custom Image Upload Option -->
                 <div style="margin: 12px 0; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); box-sizing: border-box;">
                     <input type="file" id="customAvatarUpload" accept="image/*" style="display: none;">
                     <button type="button" class="btn outline-btn" onclick="document.getElementById('customAvatarUpload').click()" style="width: 100%; font-size: 0.85rem;">📁 Upload Custom Image Avatar</button>
                 </div>
 
-                <!-- Precautionary Loading Wrapper -->
-                <div id="gridLoadingNotice">Loading selectable avatars...</div>
+                <!-- Isolated Avatar Frame with Loading & Manual Retry -->
+                <div style="position: relative;">
+                    <div id="avatarFrameLoader" class="frame-loader">
+                        <div class="spinner"></div>
+                        <span>Loading avatar options...</span>
+                        <button onclick="window.reloadAvatarFrame()" style="background: none; border: none; color: var(--secondary); cursor: pointer; text-decoration: underline; font-weight: bold; font-size: 0.75rem; margin-top: 4px;">Retry Frame</button>
+                    </div>
+                    <div class="avatar-grid" id="avatarGrid"></div>
+                </div>
 
-                <!-- 25 Emojis Selection Grid -->
-                <div class="avatar-grid" id="avatarGrid"></div>
-
-                <button id="saveAvatarBtn" class="btn primary-btn" style="width: 100%;">Save & Return to Arena</button>
+                <button id="saveAvatarBtn" class="btn primary-btn" style="width: 100%; margin-top: 10px;">Save & Return to Arena</button>
                 <p id="avatarStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary); text-shadow: var(--text-shadow);"></p>
             </div>
         </main>
@@ -117,25 +91,18 @@
 
     <script type="module">
         import { db, ref, set, get } from './network.js';
+        import { compressImageToThumbnail } from './image-compressor.js';
+        import { globalLogger } from './logger.js';
         
-        const EMOJIS = [
-            '😀', '😎', '🤖', '🦊', '🐱', 
-            '🦁', '🐯', '🦄', '🐲', '👻', 
-            '💀', '👽', '👑', '⚡', '🔥', 
-            '💎', '🚀', '⚽', '🎯', '🎮', 
-            '🏆', '🧙‍♂️', '🥷', '🦸‍♂️', '🦾'
-        ];
-
+        const EMOJIS = ['😀', '😎', '🤖', '🦊', '🐱', '🦁', '🐯', '🦄', '🐲', '👻', '💀', '👽', '👑', '⚡', '🔥', '💎', '🚀', '⚽', '🎯', '🎮', '🏆', '🧙‍♂️', '🥷', '🦸‍♂️', '🦾'];
         const currentUser = localStorage.getItem('arena_chess_user');
-        if (!currentUser) {
-            window.location.href = 'game.html';
-        }
+        if (!currentUser) window.location.href = 'game.html';
 
         let chosenEmoji = '😀';
         const grid = document.getElementById('avatarGrid');
         const preview = document.getElementById('selectedEmojiPreview');
         const statusText = document.getElementById('avatarStatus');
-        const loadingNotice = document.getElementById('gridLoadingNotice');
+        const loader = document.getElementById('avatarFrameLoader');
         const customUpload = document.getElementById('customAvatarUpload');
 
         function updatePreview(val) {
@@ -146,23 +113,32 @@
             }
         }
 
-        async function initAvatarScreen() {
+        window.reloadAvatarFrame = async function() {
+            if (loader) loader.style.display = 'flex';
+            globalLogger.log("Manually reloading avatar frame...", "info");
+            
+            // Auto-recovery self-timeout wrapper (3 seconds max)
+            const timeout = new Promise(resolve => setTimeout(resolve, 3000));
             try {
-                const userRef = ref(db, `arena_users/${currentUser}/avatar`);
-                const snap = await get(userRef);
-                if (snap.exists()) {
+                const fetchPromise = get(ref(db, `arena_users/${currentUser}/avatar`));
+                const snap = await Promise.race([fetchPromise, timeout]);
+                if (snap && snap.exists()) {
                     chosenEmoji = snap.val();
+                    updatePreview(chosenEmoji);
+                } else {
+                    const cached = localStorage.getItem('arena_chess_avatar');
+                    if (cached) chosenEmoji = cached;
                     updatePreview(chosenEmoji);
                 }
             } catch (err) {
-                console.warn("Using local cache fallback due to network lag.");
+                globalLogger.log(`Avatar frame reload error: ${err.message}`, "error");
                 const cached = localStorage.getItem('arena_chess_avatar');
                 if (cached) chosenEmoji = cached;
                 updatePreview(chosenEmoji);
             } finally {
                 renderGrid();
             }
-        }
+        };
 
         function renderGrid() {
             grid.innerHTML = '';
@@ -178,19 +154,32 @@
                 };
                 grid.appendChild(btn);
             });
-
-            loadingNotice.style.display = 'none';
+            if (loader) loader.style.display = 'none';
             grid.classList.add('loaded');
+            globalLogger.log("Avatar frame loaded successfully.", "success");
         }
 
         customUpload.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            statusText.style.color = "#ffffff";
+            statusText.innerText = "Compressing image (high fidelity)...";
+
             const reader = new FileReader();
-            reader.onload = (event) => {
-                chosenEmoji = event.target.result;
-                updatePreview(chosenEmoji);
-                document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            reader.onload = async (event) => {
+                try {
+                    chosenEmoji = await compressImageToThumbnail(event.target.result, 128, 128, 0.8);
+                    updatePreview(chosenEmoji);
+                    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+                    statusText.style.color = "var(--secondary)";
+                    statusText.innerText = "Image compressed and ready!";
+                } catch (err) {
+                    globalLogger.log(`Compression failed: ${err.message}`, "error");
+                    chosenEmoji = event.target.result;
+                    updatePreview(chosenEmoji);
+                    statusText.style.color = "var(--accent)";
+                    statusText.innerText = "Image loaded (uncompressed fallback).";
+                }
             };
             reader.readAsDataURL(file);
         };
@@ -201,18 +190,18 @@
             try {
                 await set(ref(db, `arena_users/${currentUser}/avatar`), chosenEmoji);
                 localStorage.setItem('arena_chess_avatar', chosenEmoji);
+                localStorage.setItem(`chess_campaign_avatar_${currentUser}`, chosenEmoji);
                 statusText.style.color = "var(--secondary)";
                 statusText.innerText = "Avatar saved successfully!";
-                setTimeout(() => {
-                    window.location.href = 'game.html';
-                }, 800);
+                setTimeout(() => window.location.href = 'game.html', 800);
             } catch (err) {
+                globalLogger.log(`Failed to save avatar: ${err.message}`, "error");
                 statusText.style.color = "var(--accent)";
                 statusText.innerText = "Failed to save avatar.";
             }
         };
 
-        initAvatarScreen();
+        window.reloadAvatarFrame();
     </script>
 </body>
 </html>
