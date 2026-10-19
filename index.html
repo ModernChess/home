@@ -42,7 +42,7 @@
     <!-- Advanced Floating Logger System Integration -->
     <script type="module" src="logger.js"></script>
 
-    <!-- Session Script -->
+    <!-- Session Script with Custom Image & Emoji Avatar Support -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('arena_chess_user');
@@ -50,7 +50,11 @@
             const welcomeTitle = document.getElementById('homeWelcomeTitle');
 
             if (savedUser && welcomeTitle) {
-                welcomeTitle.innerHTML = `Welcome, <span style="vertical-align: middle; margin-right: 2px;">${savedAvatar}</span> ${savedUser}!`;
+                const avatarHTML = (savedAvatar.startsWith('data:image/') || savedAvatar.startsWith('http'))
+                    ? `<img src="${savedAvatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 4px;">`
+                    : `<span style="vertical-align: middle; margin-right: 2px;">${savedAvatar}</span>`;
+
+                welcomeTitle.innerHTML = `Welcome, ${avatarHTML} ${savedUser}!`;
             }
         });
     </script>
