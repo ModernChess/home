@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            padding: 10px 3px 20px 3px;
+        }
         .summary-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted); }
         .summary-box span { color: #fff; font-weight: 600; }
         .form-group { margin-bottom: 12px; text-align: left; }
@@ -67,7 +70,6 @@
     <script type="module">
         import { globalLogger } from './logger.js';
 
-        // Parse configuration params from URL
         const params = new URLSearchParams(window.location.search);
         const material = params.get('material') || 'Standard Wood';
         const size = params.get('size') || 'Standard';
