@@ -27,6 +27,7 @@
             box-sizing: border-box;
             max-width: 620px;
             margin: 0 auto;
+            position: relative;
         }
         h1, h2, h3, h4, p, span, label {
             color: #ffffff;
@@ -123,6 +124,40 @@
             animation: pulseLerp 1.8s ease-in-out infinite;
         }
 
+        /* Global UI Shield Loader Overlay */
+        #globalUiLoader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 20, 0.92);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            gap: 10px;
+            transition: opacity 0.3s ease;
+        }
+        .spinner-shield {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: var(--secondary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .locked-interaction {
+            pointer-events: none !important;
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+        }
+
         .global-chat-msg { font-size: 0.8rem; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 4px; word-break: break-word; color: #ffffff; text-shadow: var(--text-shadow); }
         .global-chat-msg span { color: var(--secondary); font-weight: 600; text-shadow: var(--text-shadow); }
         footer p {
@@ -134,6 +169,12 @@
 <body>
 
     <div class="container">
+        <!-- Global Loading Shield Overlay -->
+        <div id="globalUiLoader">
+            <div class="spinner-shield"></div>
+            <span id="globalLoaderText" style="font-size: 0.85rem; font-weight: 600; color: #e0e0e0;">Synchronizing profile & profile ranks...</span>
+        </div>
+
         <header>
             <h1 class="logo" style="color: #ffffff; text-shadow: var(--text-shadow);">
                 <img src="https://raw.githubusercontent.com/ModernChess/assets-images/main/mchess.png" alt="Modern Chess" style="height: 35px; vertical-align: middle; object-fit: contain;">
@@ -168,8 +209,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px;">
                     <h3 id="welcomeUser" style="font-size: 1rem; color: var(--secondary); text-shadow: var(--text-shadow);">Logged in</h3>
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <a href="faction.html" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(231,76,60,0.1);">Faction</a>
-                        <a href="avatar.html" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(46,204,113,0.1);">Avatar</a>
+                        <a href="faction.html" id="factionLinkBtn" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(231,76,60,0.1);">Faction</a>
+                        <a href="avatar.html" id="avatarLinkBtn" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto; background: rgba(46,204,113,0.1);">Avatar</a>
                         <button id="logoutBtn" class="btn outline-btn" style="padding: 5px 10px; font-size: 0.75rem; width: auto;">Logout</button>
                     </div>
                 </div>
@@ -180,14 +221,14 @@
                     
                     <!-- Top Play Online Button (Green Fill -> Updated to /onlineplus) -->
                     <div style="margin-bottom: 10px;">
-                        <a href="https://modernchess.github.io/onlineplus" target="_blank" class="portal-btn btn-green-fill">Play Online</a>
+                        <a href="https://modernchess.github.io/onlineplus" id="playOnlineBtn" target="_blank" class="portal-btn btn-green-fill">Play Online</a>
                     </div>
 
                     <!-- Middle Action Row -->
                     <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center;">
-                        <a href="https://modernchess.github.io/bot1" target="_blank" class="portal-btn btn-blue-fill">Play with Bot</a>
-                        <a href="https://modernchess.github.io/new" target="_blank" class="portal-btn btn-red-fill">Play on Same Device</a>
-                        <a href="tutorial.html" class="portal-btn btn-white-fill animated-lerp-btn">How to Play</a>
+                        <a href="https://modernchess.github.io/bot1" id="playBotBtn" target="_blank" class="portal-btn btn-blue-fill">Play with Bot</a>
+                        <a href="https://modernchess.github.io/new" id="playDeviceBtn" target="_blank" class="portal-btn btn-red-fill">Play on Same Device</a>
+                        <a href="tutorial.html" id="tutorialBtn" class="portal-btn btn-white-fill animated-lerp-btn">How to Play</a>
                     </div>
                 </div>
 
