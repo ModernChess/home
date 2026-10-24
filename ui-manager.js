@@ -1,12 +1,85 @@
-// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, Factions, Ranks, and Frame Retry Mechanisms
+// ui-manager.js - Handles Independent Authentication, Presence, Global Chat, Avatars, Factions, Auto-Ranks, and Frame Retry Mechanisms
 import { db, ref, set, get, onValue, push, remove, update, onDisconnect, serverTimestamp } from './network.js';
 import { globalLogger } from './logger.js';
 
 let currentUser = localStorage.getItem('arena_chess_user') || null;
 let currentAvatar = localStorage.getItem('arena_chess_avatar') || '😀';
 let currentFaction = localStorage.getItem('arena_chess_faction') || 'Order';
-let currentRank = localStorage.getItem('arena_chess_rank') || 'Trainee ⭐';
+let currentRank = localStorage.getItem('arena_chess_rank') || 'Trainee (11th Class 🔹)';
 let authMode = 'login'; // 'login' or 'signup'
+
+// Faction Rank Map Validator
+const rankLists = {
+    Order: [
+        "Grandmarshall", "High Templar", "Marshal", "Paladin",
+        "Elite Knight", "Commander", "Knight", "Baron", "Count", "Squire", "Trainee"
+    ],
+    Syndicate: [
+        "Vindicator", "Warmaster", "Destroyer", "Dreadlord",
+        "Extractor", "Executioner", "Castigator", "Infiltrator", "Larcener", "Scout", "Trainee"
+    ]
+};
+
+function isRankValidForFaction(rank, faction) {
+    if (!rank) return false;
+    const validRanks = rankLists[faction] || [];
+    return validRanks.some(r => rank.startsWith(r));
+}
+
+// UI Lock/Shield Controller to prevent premature button clicks during database load
+export function setUiLoadingState(isLoading, message = "Synchronizing profile & ranks...") {
+    const loader = document.getElementById('globalUiLoader');
+    const loaderText = document.getElementById('globalLoaderText');
+    const interactiveElements = [
+        document.getElementById('factionLinkBtn'),
+        document.getElementById('avatarLinkBtn'),
+        document.getElementById('logoutBtn'),
+        document.getElementById('playOnlineBtn'),
+        document.getElementById('playBotBtn'),
+        document.getElementById('playDeviceBtn'),
+        document.getElementById('tutorialBtn')
+    ];
+
+    if (loaderText) loaderText.innerText = message;
+
+    if (loader) {
+        loader.style.display = isLoading ? 'flex' : 'none';
+        loader.style.opacity = isLoading ? '1' : '0';
+    }
+
+    interactiveElements.forEach(el => {
+        if (el) {
+            if (isLoading) {
+                el.classList.add('locked-interaction');
+            } else {
+                el.classList.remove('locked-interaction');
+            }
+        }
+    });
+}
+
+// Auto-calculate rank string from XP (Paladin / Dreadlord capped at 500k XP)
+export function calculateRankFromXp(xp, faction = 'Order') {
+    if (faction === 'Order') {
+        if (xp >= 500000) return "Paladin (4th Class 🛡️🛡️)";
+        if (xp >= 180000) return "Elite Knight (5th Class 🟦)";
+        if (xp >= 65000)  return "Commander (6th Class ⚔️)";
+        if (xp >= 22000)  return "Knight (7th Class 🔷🔷)";
+        if (xp >= 7500)   return "Baron (8th Class 👑)";
+        if (xp >= 2500)   return "Count (9th Class 🔷)";
+        if (xp >= 500)    return "Squire (10th Class 🛡️)";
+        return "Trainee (11th Class 🔹)";
+    } else {
+        if (xp >= 500000) return "Dreadlord (4th Class ⚡⚡)";
+        if (xp >= 180000) return "Extractor (5th Class 🟧)";
+        if (xp >= 65000)  return "Executioner (6th Class 🗡️)";
+        if (xp >= 22000)  return "Castigator (7th Class 🔶🔶)";
+        if (xp >= 7500)   return "Infiltrator (8th Class ☣️)";
+        if (xp >= 2500)   return "Larcener (9th Class 🔶)";
+        if (xp >= 500)    return "Scout (10th Class ⚡)";
+        return "Trainee (11th Class 🔸)";
+    }
+}
 
 window.switchAuthMode = function(mode) {
     authMode = mode;
@@ -23,8 +96,6 @@ async function hashPassword(password) {
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    globalLogger.log(`[TEST HASH] "${password}" ➔ ${hashHex}`, "info");
     return hashHex;
 }
 
@@ -37,78 +108,80 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginScreen = document.getElementById('login-screen');
     const lobbyScreen = document.getElementById('lobby-screen');
 
-    if (!authActionBtn) return;
-
     if (currentUser) {
         globalLogger.log(`Fast-restored session from cache for: ${currentUser}`, "info");
         if (loginScreen) loginScreen.classList.remove('active');
         if (lobbyScreen) lobbyScreen.classList.add('active');
         loginUser(currentUser, true);
     } else {
+        setUiLoadingState(false);
         if (loginScreen) loginScreen.style.opacity = '1';
     }
 
-    authActionBtn.addEventListener('click', async () => {
-        const username = userInput.value.trim();
-        const password = passInput.value.trim();
+    if (authActionBtn) {
+        authActionBtn.addEventListener('click', async () => {
+            const username = userInput.value.trim();
+            const password = passInput.value.trim();
 
-        if (!username || !password) {
-            if (loginError) loginError.innerText = "Please enter both username and password.";
-            globalLogger.log("Authentication failed: Missing inputs.", "warn");
-            return;
-        }
-
-        authActionBtn.innerText = "Connecting...";
-        authActionBtn.disabled = true;
-
-        try {
-            const hashedPassword = await hashPassword(password);
-            const userRef = ref(db, `arena_users/${username}`);
-            const snapshot = await get(userRef);
-
-            if (authMode === 'signup') {
-                if (snapshot.exists()) {
-                    if (loginError) loginError.innerText = "Username already exists. Choose another or sign in.";
-                    authActionBtn.innerText = "Login";
-                    authActionBtn.disabled = false;
-                    return;
-                }
-                await set(userRef, { 
-                    password: hashedPassword, 
-                    avatar: '😀', 
-                    faction: 'Order', 
-                    rank: 'Trainee ⭐', 
-                    createdAt: serverTimestamp() 
-                });
-                globalLogger.log(`New independent user registered: ${username}`, "success");
-                loginUser(username);
-            } else {
-                let isValidPreset = false;
-                if (/^player([1-9]|10)$/.test(username) && password === '123') {
-                    isValidPreset = true;
-                }
-
-                if (snapshot.exists() && snapshot.val().password === hashedPassword) {
-                    isValidPreset = true;
-                }
-
-                if (isValidPreset) {
-                    globalLogger.log(`Independent user logged in: ${username}`, "success");
-                    loginUser(username);
-                } else {
-                    if (loginError) loginError.innerText = "Invalid username or password.";
-                    globalLogger.log(`Failed login attempt for user: ${username}`, "error");
-                    authActionBtn.innerText = authMode === 'signup' ? 'Register & Sign Up' : 'Login';
-                    authActionBtn.disabled = false;
-                }
+            if (!username || !password) {
+                if (loginError) loginError.innerText = "Please enter both username and password.";
+                globalLogger.log("Authentication failed: Missing inputs.", "warn");
+                return;
             }
-        } catch (err) {
-            if (loginError) loginError.innerText = "Database connection error.";
-            globalLogger.log(`Firebase Auth Error: ${err.message}`, "error");
-            authActionBtn.innerText = authMode === 'signup' ? 'Register & Sign Up' : 'Login';
-            authActionBtn.disabled = false;
-        }
-    });
+
+            authActionBtn.innerText = "Connecting...";
+            authActionBtn.disabled = true;
+
+            try {
+                const hashedPassword = await hashPassword(password);
+                const userRef = ref(db, `arena_users/${username}`);
+                const snapshot = await get(userRef);
+
+                if (authMode === 'signup') {
+                    if (snapshot.exists()) {
+                        if (loginError) loginError.innerText = "Username already exists. Choose another or sign in.";
+                        authActionBtn.innerText = "Login";
+                        authActionBtn.disabled = false;
+                        return;
+                    }
+                    const initialRank = calculateRankFromXp(0, 'Order');
+                    await set(userRef, { 
+                        password: hashedPassword, 
+                        avatar: '😀', 
+                        faction: 'Order', 
+                        rank: initialRank, 
+                        createdAt: serverTimestamp() 
+                    });
+                    globalLogger.log(`New independent user registered: ${username}`, "success");
+                    await loginUser(username);
+                } else {
+                    let isValidPreset = false;
+                    if (/^player([1-9]|10)$/.test(username) && password === '123') {
+                        isValidPreset = true;
+                    }
+
+                    if (snapshot.exists() && snapshot.val().password === hashedPassword) {
+                        isValidPreset = true;
+                    }
+
+                    if (isValidPreset) {
+                        globalLogger.log(`Independent user logged in: ${username}`, "success");
+                        await loginUser(username);
+                    } else {
+                        if (loginError) loginError.innerText = "Invalid username or password.";
+                        globalLogger.log(`Failed login attempt for user: ${username}`, "error");
+                        authActionBtn.innerText = authMode === 'signup' ? 'Register & Sign Up' : 'Login';
+                        authActionBtn.disabled = false;
+                    }
+                }
+            } catch (err) {
+                if (loginError) loginError.innerText = "Database connection error.";
+                globalLogger.log(`Firebase Auth Error: ${err.message}`, "error");
+                authActionBtn.innerText = authMode === 'signup' ? 'Register & Sign Up' : 'Login';
+                authActionBtn.disabled = false;
+            }
+        });
+    }
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -132,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 authBtn.innerText = 'Login';
                 authBtn.disabled = false;
             }
+            setUiLoadingState(false);
         });
     }
 
@@ -166,16 +240,24 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loginUser(username, fromCache = false) {
+    setUiLoadingState(true, "Querying Firebase profile & sync status...");
+    
     currentUser = username;
     localStorage.setItem('arena_chess_user', username);
 
     currentAvatar = localStorage.getItem('arena_chess_avatar') || '😀';
     currentFaction = localStorage.getItem('arena_chess_faction') || 'Order';
-    currentRank = localStorage.getItem('arena_chess_rank') || 'Trainee ⭐';
-    
-    updateWelcomeDisplay(username, currentAvatar, currentFaction, currentRank);
 
+    let userXp = 0;
     try {
+        const xpSnap = await get(ref(db, `user_xp/${username}`));
+        if (xpSnap.exists()) {
+            const val = xpSnap.val();
+            userXp = typeof val === 'object' ? (val.xp || 0) : Number(val) || 0;
+        } else {
+            userXp = Number(localStorage.getItem(`arena_chess_xp_${username}`)) || 0;
+        }
+
         const userSnap = await get(ref(db, `arena_users/${username}`));
         if (userSnap.exists()) {
             const val = userSnap.val();
@@ -187,31 +269,44 @@ async function loginUser(username, fromCache = false) {
                 currentFaction = val.faction; 
                 localStorage.setItem('arena_chess_faction', currentFaction); 
             }
-            if (val.rank) { 
-                currentRank = val.rank; 
-                localStorage.setItem('arena_chess_rank', currentRank); 
+
+            // Verify if stored rank belongs to current faction
+            if (val.rank && isRankValidForFaction(val.rank, currentFaction)) {
+                currentRank = val.rank;
+            } else {
+                currentRank = calculateRankFromXp(userXp, currentFaction);
+                // Update Firebase with the corrected rank for current faction
+                await update(ref(db, `arena_users/${username}`), { rank: currentRank });
             }
-            updateWelcomeDisplay(username, currentAvatar, currentFaction, currentRank);
+            localStorage.setItem('arena_chess_rank', currentRank);
+        } else {
+            currentRank = calculateRankFromXp(userXp, currentFaction);
+            localStorage.setItem('arena_chess_rank', currentRank);
         }
     } catch(e) {
-        // Fallback silently if offline or slow
+        globalLogger.log(`Sync error: ${e.message}`, "warn");
+        currentRank = calculateRankFromXp(userXp, currentFaction);
+    } finally {
+        updateWelcomeDisplay(username, currentAvatar, currentFaction, currentRank);
+
+        const loginScreen = document.getElementById('login-screen');
+        const lobbyScreen = document.getElementById('lobby-screen');
+        
+        if (loginScreen) loginScreen.classList.remove('active');
+        if (lobbyScreen) lobbyScreen.classList.add('active');
+
+        const presenceRef = ref(db, `arena_presence/${username}`);
+        set(presenceRef, { 
+            online: true, 
+            avatar: currentAvatar, 
+            faction: currentFaction, 
+            rank: currentRank, 
+            lastSeen: serverTimestamp() 
+        });
+        onDisconnect(presenceRef).update({ online: false, lastSeen: serverTimestamp() });
+
+        setUiLoadingState(false);
     }
-
-    const loginScreen = document.getElementById('login-screen');
-    const lobbyScreen = document.getElementById('lobby-screen');
-    
-    if (loginScreen) loginScreen.classList.remove('active');
-    if (lobbyScreen) lobbyScreen.classList.add('active');
-
-    const presenceRef = ref(db, `arena_presence/${username}`);
-    set(presenceRef, { 
-        online: true, 
-        avatar: currentAvatar, 
-        faction: currentFaction, 
-        rank: currentRank, 
-        lastSeen: serverTimestamp() 
-    });
-    onDisconnect(presenceRef).update({ online: false, lastSeen: serverTimestamp() });
 }
 
 function updateWelcomeDisplay(username, avatar, faction, rank) {
@@ -233,7 +328,6 @@ function initGlobalChat() {
     const chatMessagesContainer = document.getElementById('globalChatMessages');
     if (!chatMessagesContainer) return;
     
-    // Show isolated loading state with manual retry option
     chatMessagesContainer.innerHTML = `
         <div id="chatLoader" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#d0d0d0; font-size:0.75rem; gap:6px;">
             <div style="width:18px; height:18px; border:2px solid rgba(255,255,255,0.2); border-top-color:var(--secondary); border-radius:50%; animation: spin 0.8s linear infinite;"></div>
@@ -241,7 +335,6 @@ function initGlobalChat() {
         </div>
     `;
 
-    // Self-recovery fallback timer (4 seconds)
     const timeout = setTimeout(() => {
         const loader = document.getElementById('chatLoader');
         if (loader) {
@@ -268,7 +361,7 @@ function initGlobalChat() {
             const msgSender = msg.sender || 'Unknown';
             const msgAvatar = msg.avatar || '😀';
             const msgFaction = msg.faction || 'Order';
-            const msgRank = msg.rank || 'Trainee ⭐';
+            const msgRank = msg.rank || 'Trainee (11th Class 🔹)';
             const factionTagColor = msgFaction === 'Order' ? '#00cec9' : '#ff7675';
             
             let timeString = '';
@@ -362,7 +455,7 @@ function initActivePlayersListener() {
                 onlineCount++;
                 const playerAvatar = status.avatar || '😀';
                 const playerFaction = status.faction || 'Order';
-                const playerRank = status.rank || 'Trainee ⭐';
+                const playerRank = status.rank || 'Trainee (11th Class 🔹)';
                 const factionColor = playerFaction === 'Order' ? '#00cec9' : '#ff7675';
 
                 const avatarHTML = (playerAvatar.startsWith('data:image/') || playerAvatar.startsWith('http'))
