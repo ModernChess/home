@@ -40,6 +40,25 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         footer p { color: #ffffff; text-shadow: var(--text-shadow); }
+
+        /* Admin Management Panel Styles */
+        .admin-panel {
+            background: rgba(142, 68, 173, 0.15);
+            border: 1px solid #9b59b6;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .admin-panel-title {
+            font-weight: bold;
+            color: #d8b4fe;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body>
@@ -56,12 +75,12 @@
                 <!-- Isolated Faction Frame Loader -->
                 <div id="factionFrameLoader" class="frame-loader">
                     <div class="spinner"></div>
-                    <span>Synchronizing faction profile...</span>
+                    <span>Synchronizing system profile and querying rank status...</span>
                     <button onclick="window.reloadFactionFrame()" style="background: none; border: none; color: var(--secondary); cursor: pointer; text-decoration: underline; font-weight: bold; font-size: 0.75rem;">Retry Frame</button>
                 </div>
 
-                <h2>Align Your Allegiance & Classes</h2>
-                <p>Choose your side to unlock its exclusive class progression tree.</p>
+                <h2>Align Your Allegiance & Rank</h2>
+                <p>Choose your faction. Max rank via XP is Paladin/Dreadlord (500k XP). Top 3 tiers require admin appointment!</p>
                 
                 <div class="faction-container">
                     <div class="faction-card" id="card-order" onclick="selectFaction('Order')">
@@ -75,27 +94,75 @@
                 </div>
 
                 <div style="margin: 15px 0; text-align: left; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); box-sizing: border-box;">
-                    <label style="font-size: 0.85rem; color: #e0e0e0; display: block; margin-bottom: 6px;">Sandbox Class Override:</label>
-                    <select id="orderRankSelect" class="rank-dropdown" style="width: 100%; padding: 10px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); box-sizing: border-box;">
-                        <option value="Grandmarshall (1st Class 🌟🌟🌟)">Grandmarshall (1st Class 🌟🌟🌟)</option>
-                        <option value="Marshal (2nd Class ⭐⭐)">Marshal (2nd Class ⭐⭐)</option>
-                        <option value="Elite Knight (3rd Class 🟦)">Elite Knight (3rd Class 🟦)</option>
-                        <option value="Knight (4th Class 🔷🔷)">Knight (4th Class 🔷🔷)</option>
-                        <option value="Count (5th Class 🔷)">Count (5th Class 🔷)</option>
-                        <option value="Trainee (6th Class 🔹)">Trainee (6th Class 🔹)</option>
+                    <label id="rankSectionLabel" style="font-size: 0.85rem; color: #e0e0e0; display: block; margin-bottom: 6px;">Combat Rank Status:</label>
+                    <div id="automaticRankDisplay" style="padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; font-weight: bold; color: var(--secondary); margin-bottom: 8px;">Loading Rank...</div>
+                    
+                    <!-- Manual rank overrides for self (Admin Only) -->
+                    <select id="orderRankSelect" class="rank-dropdown" style="width: 100%; padding: 10px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); box-sizing: border-box; display: none;">
+                        <option value="Grandmarshall (1st Class 🌟🌟🌟)">Grandmarshall (Admin Exclusive 🌟🌟🌟)</option>
+                        <option value="High Templar (2nd Class 🌟🌟)">High Templar (Admin Exclusive 🌟🌟)</option>
+                        <option value="Marshal (3rd Class ⭐⭐)">Marshal (Admin Exclusive ⭐⭐)</option>
+                        <option value="Paladin (4th Class 🛡️🛡️)">Paladin (Max XP Rank 🛡️🛡️)</option>
+                        <option value="Elite Knight (5th Class 🟦)">Elite Knight (5th Class 🟦)</option>
+                        <option value="Commander (6th Class ⚔️)">Commander (6th Class ⚔️)</option>
+                        <option value="Knight (7th Class 🔷🔷)">Knight (7th Class 🔷🔷)</option>
+                        <option value="Baron (8th Class 👑)">Baron (8th Class 👑)</option>
+                        <option value="Count (9th Class 🔷)">Count (9th Class 🔷)</option>
+                        <option value="Squire (10th Class 🛡️)">Squire (10th Class 🛡️)</option>
+                        <option value="Trainee (11th Class 🔹)">Trainee (11th Class 🔹)</option>
                     </select>
                     <select id="syndicateRankSelect" class="rank-dropdown" style="width: 100%; padding: 10px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); display: none; box-sizing: border-box;">
-                        <option value="Vindicator (1st Class 💥💥💥)">Vindicator (1st Class 💥💥💥)</option>
-                        <option value="Destroyer (2nd Class ☄️☄️)">Destroyer (2nd Class ☄️☄️)</option>
-                        <option value="Extractor (3rd Class 🟧)">Extractor (3rd Class 🟧)</option>
-                        <option value="Castigator (4th Class 🔶🔶)">Castigator (4th Class 🔶🔶)</option>
-                        <option value="Larcener (5th Class 🔶)">Larcener (5th Class 🔶)</option>
-                        <option value="Trainee (6th Class 🔸)">Trainee (6th Class 🔸)</option>
+                        <option value="Vindicator (1st Class 💥💥💥)">Vindicator (Admin Exclusive 💥💥💥)</option>
+                        <option value="Warmaster (2nd Class 💥💥)">Warmaster (Admin Exclusive 💥💥)</option>
+                        <option value="Destroyer (3rd Class ☄️☄️)">Destroyer (Admin Exclusive ☄️☄️)</option>
+                        <option value="Dreadlord (4th Class ⚡⚡)">Dreadlord (Max XP Rank ⚡⚡)</option>
+                        <option value="Extractor (5th Class 🟧)">Extractor (5th Class 🟧)</option>
+                        <option value="Executioner (6th Class 🗡️)">Executioner (6th Class 🗡️)</option>
+                        <option value="Castigator (7th Class 🔶🔶)">Castigator (7th Class 🔶🔶)</option>
+                        <option value="Infiltrator (8th Class ☣️)">Infiltrator (8th Class ☣️)</option>
+                        <option value="Larcener (9th Class 🔶)">Larcener (9th Class 🔶)</option>
+                        <option value="Scout (10th Class ⚡)">Scout (10th Class ⚡)</option>
+                        <option value="Trainee (11th Class 🔸)">Trainee (11th Class 🔸)</option>
                     </select>
                 </div>
 
-                <button id="saveFactionBtn" class="btn primary-btn" style="width: 100%;">Confirm Faction & Class & Return</button>
+                <button id="saveFactionBtn" class="btn primary-btn" style="width: 100%;">Confirm Faction & Return</button>
                 <p id="factionStatus" style="font-size: 0.8rem; margin-top: 10px; color: var(--secondary);"></p>
+
+                <!-- Admin User Rank Query & Role Management Panel -->
+                <div id="adminUserSystemPanel" class="admin-panel" style="display: none;">
+                    <div class="admin-panel-title">⚙️ Admin Control: Query & Manage User Ranks</div>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <input type="text" id="adminQueryUsername" placeholder="Enter target username..." style="flex: 1; padding: 8px; border-radius: 6px; background: #121214; border: 1px solid var(--border-color); color: #fff; font-size: 0.8rem;">
+                        <button id="adminSearchUserBtn" class="btn primary-btn" style="padding: 8px 12px; font-size: 0.8rem; width: auto;">Query User</button>
+                    </div>
+
+                    <div id="adminQueryResultFrame" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                        <div style="font-size: 0.8rem; color: #fff; margin-bottom: 6px;">
+                            User: <strong id="queryTargetName" style="color: var(--secondary);">-</strong> | 
+                            XP: <strong id="queryTargetXp" style="color: #f1c40f;">0 XP</strong> | 
+                            Faction: <strong id="queryTargetFaction" style="color: #3498db;">-</strong>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #ddd; margin-bottom: 8px;">
+                            Current Rank: <strong id="queryTargetRank" style="color: #2ecc71;">-</strong>
+                        </div>
+
+                        <!-- Role Override Controls -->
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label style="font-size: 0.75rem; color: #bbb;">Set Target Faction & Rank Override:</label>
+                            <select id="adminTargetFaction" style="padding: 8px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); font-size: 0.8rem;">
+                                <option value="Order">Order</option>
+                                <option value="Syndicate">Syndicate</option>
+                            </select>
+                            <select id="adminTargetRank" style="padding: 8px; border-radius: 6px; background: #121214; color: #fff; border: 1px solid var(--border-color); font-size: 0.8rem;">
+                                <!-- Dynamically populated based on target faction -->
+                            </select>
+                            <button id="adminApplyRankBtn" class="btn primary-btn" style="background: #8e44ad; border-color: #9b59b6; margin-top: 4px; font-size: 0.8rem;">Apply Rank Update to User</button>
+                        </div>
+                    </div>
+                    <p id="adminStatusText" style="font-size: 0.75rem; color: #d8b4fe; margin: 0;"></p>
+                </div>
+
             </div>
         </main>
 
@@ -111,11 +178,103 @@
         const currentUser = localStorage.getItem('arena_chess_user');
         if (!currentUser) window.location.href = 'game.html';
 
+        const isAdmin = (currentUser === 'Testaccount3');
         let selectedFaction = 'Order';
+        let originalFaction = 'Order';
+        let userXp = 0;
+        let existingAssignedRank = '';
+
         const orderSelect = document.getElementById('orderRankSelect');
         const syndicateSelect = document.getElementById('syndicateRankSelect');
-        const loader = document.getElementById('factionFrameLoader');
+        const rankDisplay = document.getElementById('automaticRankDisplay');
+        const rankLabel = document.getElementById('rankSectionLabel');
+        const factionFrameLoader = document.getElementById('factionFrameLoader');
         const statusText = document.getElementById('factionStatus');
+
+        // Admin System UI elements
+        const adminPanel = document.getElementById('adminUserSystemPanel');
+        const queryInput = document.getElementById('adminQueryUsername');
+        const queryBtn = document.getElementById('adminSearchUserBtn');
+        const resultFrame = document.getElementById('adminQueryResultFrame');
+        const targetNameEl = document.getElementById('queryTargetName');
+        const targetXpEl = document.getElementById('queryTargetXp');
+        const targetFactionEl = document.getElementById('queryTargetFaction');
+        const targetRankEl = document.getElementById('queryTargetRank');
+        const adminFactionSelect = document.getElementById('adminTargetFaction');
+        const adminRankSelect = document.getElementById('adminTargetRank');
+        const adminApplyBtn = document.getElementById('adminApplyRankBtn');
+        const adminStatus = document.getElementById('adminStatusText');
+
+        let activeQueriedUser = null;
+
+        const rankLists = {
+            Order: [
+                "Grandmarshall (1st Class 🌟🌟🌟)",
+                "High Templar (2nd Class 🌟🌟)",
+                "Marshal (3rd Class ⭐⭐)",
+                "Paladin (4th Class 🛡️🛡️)",
+                "Elite Knight (5th Class 🟦)",
+                "Commander (6th Class ⚔️)",
+                "Knight (7th Class 🔷🔷)",
+                "Baron (8th Class 👑)",
+                "Count (9th Class 🔷)",
+                "Squire (10th Class 🛡️)",
+                "Trainee (11th Class 🔹)"
+            ],
+            Syndicate: [
+                "Vindicator (1st Class 💥💥💥)",
+                "Warmaster (2nd Class 💥💥)",
+                "Destroyer (3rd Class ☄️☄️)",
+                "Dreadlord (4th Class ⚡⚡)",
+                "Extractor (5th Class 🟧)",
+                "Executioner (6th Class 🗡️)",
+                "Castigator (7th Class 🔶🔶)",
+                "Infiltrator (8th Class ☣️)",
+                "Larcener (9th Class 🔶)",
+                "Scout (10th Class ⚡)",
+                "Trainee (11th Class 🔸)"
+            ]
+        };
+
+        function calculateRankString(xp, faction) {
+            if (faction === 'Order') {
+                if (xp >= 500000) return "Paladin (4th Class 🛡️🛡️)";
+                if (xp >= 180000) return "Elite Knight (5th Class 🟦)";
+                if (xp >= 65000)  return "Commander (6th Class ⚔️)";
+                if (xp >= 22000)  return "Knight (7th Class 🔷🔷)";
+                if (xp >= 7500)   return "Baron (8th Class 👑)";
+                if (xp >= 2500)   return "Count (9th Class 🔷)";
+                if (xp >= 500)    return "Squire (10th Class 🛡️)";
+                return "Trainee (11th Class 🔹)";
+            } else {
+                if (xp >= 500000) return "Dreadlord (4th Class ⚡⚡)";
+                if (xp >= 180000) return "Extractor (5th Class 🟧)";
+                if (xp >= 65000)  return "Executioner (6th Class 🗡️)";
+                if (xp >= 22000)  return "Castigator (7th Class 🔶🔶)";
+                if (xp >= 7500)   return "Infiltrator (8th Class ☣️)";
+                if (xp >= 2500)   return "Larcener (9th Class 🔶)";
+                if (xp >= 500)    return "Scout (10th Class ⚡)";
+                return "Trainee (11th Class 🔸)";
+            }
+        }
+
+        function isRankValidForFaction(rank, faction) {
+            if (!rank) return false;
+            const validRanks = rankLists[faction] || [];
+            return validRanks.some(r => rank.startsWith(r.split(' ')[0]));
+        }
+
+        function populateAdminRankDropdown(faction) {
+            if (!adminRankSelect) return;
+            adminRankSelect.innerHTML = '';
+            const list = rankLists[faction] || rankLists['Order'];
+            list.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r;
+                opt.innerText = r;
+                adminRankSelect.appendChild(opt);
+            });
+        }
 
         window.selectFaction = function(faction) {
             selectedFaction = faction;
@@ -123,66 +282,175 @@
             const activeCard = document.getElementById(`card-${faction.toLowerCase()}`);
             if (activeCard) activeCard.classList.add('selected');
 
-            if (faction === 'Order') {
-                orderSelect.style.display = 'block';
-                syndicateSelect.style.display = 'none';
+            // Detect if assigned rank belongs to current target faction
+            const belongsToTargetFaction = isRankValidForFaction(existingAssignedRank, selectedFaction);
+            const calculatedRank = belongsToTargetFaction ? existingAssignedRank : calculateRankString(userXp, selectedFaction);
+
+            if (isAdmin) {
+                rankDisplay.style.display = 'none';
+                rankLabel.innerText = "Admin Rank Override & Self Controls:";
+                if (adminPanel) adminPanel.style.display = 'block';
+
+                if (faction === 'Order') {
+                    orderSelect.style.display = 'block';
+                    syndicateSelect.style.display = 'none';
+                    orderSelect.value = calculatedRank;
+                } else {
+                    orderSelect.style.display = 'none';
+                    syndicateSelect.style.display = 'block';
+                    syndicateSelect.value = calculatedRank;
+                }
             } else {
+                rankDisplay.style.display = 'block';
                 orderSelect.style.display = 'none';
-                syndicateSelect.style.display = 'block';
+                syndicateSelect.style.display = 'none';
+                if (adminPanel) adminPanel.style.display = 'none';
+                rankDisplay.innerText = `${calculatedRank} [${userXp} Total XP]`;
             }
         };
 
         window.reloadFactionFrame = async function() {
-            if (loader) loader.style.display = 'flex';
-            globalLogger.log("Reloading faction profile frame...", "info");
+            if (factionFrameLoader) factionFrameLoader.style.display = 'flex';
+            globalLogger.log("Querying system user profile and rank data...", "info");
 
-            const timeout = new Promise(resolve => setTimeout(resolve, 3000));
             try {
-                const fetchPromise = get(ref(db, `arena_users/${currentUser}`));
-                const snap = await Promise.race([fetchPromise, timeout]);
-                if (snap && snap.exists()) {
-                    const data = snap.val();
-                    if (data.faction) selectedFaction = data.faction;
-                    selectFaction(selectedFaction);
-                    if (data.rank) {
-                        if (selectedFaction === 'Order') orderSelect.value = data.rank;
-                        else syndicateSelect.value = data.rank;
-                    }
+                const snap = await get(ref(db, `user_xp/${currentUser}`));
+                if (snap.exists()) {
+                    const val = snap.val();
+                    userXp = typeof val === 'object' ? (val.xp || 0) : Number(val) || 0;
                 } else {
-                    const cachedFaction = localStorage.getItem('arena_chess_faction') || 'Order';
-                    const cachedRank = localStorage.getItem('arena_chess_rank');
-                    selectFaction(cachedFaction);
-                    if (cachedRank) {
-                        if (cachedFaction === 'Order') orderSelect.value = cachedRank;
-                        else syndicateSelect.value = cachedRank;
-                    }
+                    userXp = Number(localStorage.getItem(`arena_chess_xp_${currentUser}`)) || 0;
                 }
+
+                const userSnap = await get(ref(db, `arena_users/${currentUser}`));
+                if (userSnap.exists()) {
+                    const userData = userSnap.val();
+                    if (userData.faction) {
+                        selectedFaction = userData.faction;
+                        originalFaction = userData.faction;
+                    }
+                    if (userData.rank) existingAssignedRank = userData.rank;
+                } else {
+                    selectedFaction = localStorage.getItem('arena_chess_faction') || 'Order';
+                    originalFaction = selectedFaction;
+                }
+
+                selectFaction(selectedFaction);
             } catch (err) {
-                globalLogger.log(`Faction frame load error: ${err.message}`, "error");
-                const cachedFaction = localStorage.getItem('arena_chess_faction') || 'Order';
-                selectFaction(cachedFaction);
+                globalLogger.log(`Error querying user system profile: ${err.message}`, "error");
+                selectFaction('Order');
             } finally {
-                if (loader) loader.style.display = 'none';
-                globalLogger.log("Faction frame loaded successfully.", "success");
+                if (factionFrameLoader) factionFrameLoader.style.display = 'none';
             }
         };
 
+        // Admin User Query System Handlers
+        if (isAdmin && queryBtn) {
+            adminFactionSelect.onchange = () => {
+                populateAdminRankDropdown(adminFactionSelect.value);
+            };
+
+            queryBtn.onclick = async () => {
+                const targetUser = queryInput.value.trim();
+                if (!targetUser) {
+                    adminStatus.innerText = "Please enter a valid username.";
+                    return;
+                }
+
+                adminStatus.innerText = `Querying system records for '${targetUser}'...`;
+                try {
+                    const userRef = ref(db, `arena_users/${targetUser}`);
+                    const userSnap = await get(userRef);
+
+                    if (!userSnap.exists()) {
+                        adminStatus.innerText = `User '${targetUser}' does not exist in Firebase database.`;
+                        resultFrame.style.display = 'none';
+                        return;
+                    }
+
+                    const xpSnap = await get(ref(db, `user_xp/${targetUser}`));
+                    let targetXp = 0;
+                    if (xpSnap.exists()) {
+                        const val = xpSnap.val();
+                        targetXp = typeof val === 'object' ? (val.xp || 0) : Number(val) || 0;
+                    }
+
+                    const userData = userSnap.val();
+                    activeQueriedUser = targetUser;
+                    targetNameEl.innerText = targetUser;
+                    targetXpEl.innerText = `${targetXp} XP`;
+                    
+                    const tFaction = userData.faction || 'Order';
+                    targetFactionEl.innerText = tFaction;
+
+                    let tRank = userData.rank;
+                    if (!isRankValidForFaction(tRank, tFaction)) {
+                        tRank = calculateRankString(targetXp, tFaction);
+                    }
+                    targetRankEl.innerText = tRank;
+
+                    adminFactionSelect.value = tFaction;
+                    populateAdminRankDropdown(tFaction);
+                    if (isRankValidForFaction(tRank, tFaction)) {
+                        adminRankSelect.value = tRank;
+                    }
+
+                    resultFrame.style.display = 'block';
+                    adminStatus.innerText = `User profile loaded successfully.`;
+                } catch (err) {
+                    adminStatus.innerText = `Query error: ${err.message}`;
+                    resultFrame.style.display = 'none';
+                }
+            };
+
+            adminApplyBtn.onclick = async () => {
+                if (!activeQueriedUser) return;
+                const newFaction = adminFactionSelect.value;
+                const newRank = adminRankSelect.value;
+
+                adminStatus.innerText = `Applying rank override for '${activeQueriedUser}'...`;
+                try {
+                    await update(ref(db, `arena_users/${activeQueriedUser}`), {
+                        faction: newFaction,
+                        rank: newRank
+                    });
+
+                    targetFactionEl.innerText = newFaction;
+                    targetRankEl.innerText = newRank;
+                    adminStatus.innerText = `Successfully updated '${activeQueriedUser}' to [${newFaction} • ${newRank}]!`;
+                    globalLogger.log(`Admin override applied to ${activeQueriedUser}: ${newFaction} - ${newRank}`, "success");
+                } catch (err) {
+                    adminStatus.innerText = `Failed to update user: ${err.message}`;
+                }
+            };
+        }
+
         document.getElementById('saveFactionBtn').onclick = async () => {
-            const chosenRank = selectedFaction === 'Order' ? orderSelect.value : syndicateSelect.value;
+            const belongsToSelectedFaction = isRankValidForFaction(existingAssignedRank, selectedFaction);
+
+            const finalRank = isAdmin 
+                ? (selectedFaction === 'Order' ? orderSelect.value : syndicateSelect.value)
+                : (belongsToSelectedFaction ? existingAssignedRank : calculateRankString(userXp, selectedFaction));
+
             statusText.style.color = "#ffffff";
-            statusText.innerText = "Saving faction selection...";
+            statusText.innerText = "Updating system profile & ranks...";
 
             try {
-                await update(ref(db, `arena_users/${currentUser}`), { faction: selectedFaction, rank: chosenRank });
+                await update(ref(db, `arena_users/${currentUser}`), { faction: selectedFaction, rank: finalRank });
+                
+                // Also update live presence if online
+                await update(ref(db, `arena_presence/${currentUser}`), { faction: selectedFaction, rank: finalRank });
+
                 localStorage.setItem('arena_chess_faction', selectedFaction);
-                localStorage.setItem('arena_chess_rank', chosenRank);
+                localStorage.setItem('arena_chess_rank', finalRank);
+                
                 statusText.style.color = "var(--secondary)";
-                statusText.innerText = `Successfully set to [${selectedFaction} • ${chosenRank}]! Returning...`;
+                statusText.innerText = `Successfully synced [${selectedFaction} • ${finalRank}]! Returning...`;
                 setTimeout(() => window.location.href = 'game.html', 800);
             } catch (err) {
-                globalLogger.log(`Failed to save faction: ${err.message}`, "error");
+                globalLogger.log(`Failed to update profile: ${err.message}`, "error");
                 statusText.style.color = "var(--accent)";
-                statusText.innerText = "Failed to save data. Please check network.";
+                statusText.innerText = "Failed to update database. Check connection.";
             }
         };
 
