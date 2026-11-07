@@ -27,7 +27,7 @@ function isRankValidForFaction(rank, faction) {
 }
 
 // UI Lock/Shield Controller to prevent premature button clicks during database load
-export function setUiLoadingState(isLoading, message = "Synchronizing profile & ranks...") {
+export function setUiLoadingState(isLoading, message = "Loading matchmaking arena...") {
     const loader = document.getElementById('globalUiLoader');
     const loaderText = document.getElementById('globalLoaderText');
     const interactiveElements = [
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loginUser(username, fromCache = false) {
-    setUiLoadingState(true, "Querying Firebase profile & sync status...");
+    setUiLoadingState(true, "Loading matchmaking arena...");
     
     currentUser = username;
     localStorage.setItem('arena_chess_user', username);
@@ -250,7 +250,11 @@ async function loginUser(username, fromCache = false) {
 
     let userXp = 0;
     try {
-        const xpSnap = await get(ref(db, `user_xp/${username}`));
+        const [xpSnap, userSnap] = await Promise.all([
+            get(ref(db, `user_xp/${username}`)),
+            get(ref(db, `arena_users/${username}`))
+        ]);
+
         if (xpSnap.exists()) {
             const val = xpSnap.val();
             userXp = typeof val === 'object' ? (val.xp || 0) : Number(val) || 0;
@@ -258,7 +262,6 @@ async function loginUser(username, fromCache = false) {
             userXp = Number(localStorage.getItem(`arena_chess_xp_${username}`)) || 0;
         }
 
-        const userSnap = await get(ref(db, `arena_users/${username}`));
         if (userSnap.exists()) {
             const val = userSnap.val();
             if (val.avatar) { 
@@ -270,13 +273,11 @@ async function loginUser(username, fromCache = false) {
                 localStorage.setItem('arena_chess_faction', currentFaction); 
             }
 
-            // Verify if stored rank belongs to current faction
             if (val.rank && isRankValidForFaction(val.rank, currentFaction)) {
                 currentRank = val.rank;
             } else {
                 currentRank = calculateRankFromXp(userXp, currentFaction);
-                // Update Firebase with the corrected rank for current faction
-                await update(ref(db, `arena_users/${username}`), { rank: currentRank });
+                update(ref(db, `arena_users/${username}`), { rank: currentRank }).catch(() => {});
             }
             localStorage.setItem('arena_chess_rank', currentRank);
         } else {
@@ -302,8 +303,8 @@ async function loginUser(username, fromCache = false) {
             faction: currentFaction, 
             rank: currentRank, 
             lastSeen: serverTimestamp() 
-        });
-        onDisconnect(presenceRef).update({ online: false, lastSeen: serverTimestamp() });
+        }).catch(() => {});
+        onDisconnect(presenceRef).update({ online: false, lastSeen: serverTimestamp() }).catch(() => {});
 
         setUiLoadingState(false);
     }
